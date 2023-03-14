@@ -1,0 +1,25 @@
+{
+    "name": "hexlet/code",
+    "autoload": {
+        "psr-4": {
+            "Hexlet\\Code\\": "src/"
+        },
+        "files": [
+            "src/Helper.php"
+            ]
+    },
+    "authors": [
+        {
+            "name": "Tatiana Antonova",
+            "email": "to.antonova@mail.ru"
+        }
+    ],
+    "description": "hexlet project 48",
+    "license": "MIT",
+    "bin": [
+        "bin/gendiff"
+    ],
+    "require": {
+        "docopt/docopt": "^1.0"
+    }
+}
