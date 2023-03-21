@@ -1,6 +1,6 @@
 <?php
 
-namespace GeneratorDiff\Helper;
+namespace Differ\Helper;
 
 function showHelpMe()
 {

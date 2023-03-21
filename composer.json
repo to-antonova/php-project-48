@@ -5,7 +5,8 @@
             "Hexlet\\Code\\": "src/"
         },
         "files": [
-            "src/Helper.php"
+            "src/Helper.php",
+            "src/Differ.php"
             ]
     },
     "authors": [
