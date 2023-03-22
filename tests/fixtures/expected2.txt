@@ -1,0 +1,7 @@
+{
+  - a: none
+  - b: yes
+  + b: no
+    c: 35
+  + d: true
+}

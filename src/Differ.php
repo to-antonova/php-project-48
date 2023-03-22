@@ -4,63 +4,75 @@ namespace Differ\Differ;
 
 function stayBool($value)
 {
-    if ($value === "NULL") {
+    if ($value === null) {
         return "null";
     }
-    return boolval($value) ? 'true' : 'false';
+
+    if ($value === true) {
+        return "true";
+    }
+
+    if ($value === false) {
+        return "false";
+    } else {
+        return $value;
+    }
 }
 
-
-function genDiff($pathToFirstFile, $pathToSecondFile)
+function getJsonToArray($pathToFile)
 {
-//    $jsonFirstFile = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '../tests/' . $nameOfFirstFile);
-//    $jsonSecondFile = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '../tests/' . $nameOfSecondFile);
-    if ($pathToFirstFile === false || $pathToSecondFile === false) {
-        return 'Error path';
+    if ($pathToFile === false) {
+        return '\033[41mPath error\033[0m' . PHP_EOL;
     }
-    $jsonFirstFile = file_get_contents($pathToFirstFile);
-    $jsonSecondFile = file_get_contents($pathToSecondFile);
-    $arrayFirstFile = json_decode($jsonFirstFile, true);
-    $arraySecondFile = json_decode($jsonSecondFile, true);
+
+    $contentFile =  file_get_contents($pathToFile);
+    return json_decode($contentFile, true);
+//    $jsonFirstFile = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '../tests/' . $pathToFirstFile);
+}
+
+function findArrayDiff($arrayFirstFile, $arraySecondFile): array
+{
+
     $unionArray = [];
 
     foreach ($arrayFirstFile as $key => $value) {
         if (!array_key_exists($key, $arraySecondFile)) {
-            $unionArray[] = "- {$key}: " . stayBool($value);
+            $unionArray[] = "  - {$key}: " . stayBool($value);
         }
     }
 
     foreach ($arrayFirstFile as $key => $value) {
         if (array_key_exists($key, $arraySecondFile)) {
             if ($value === $arraySecondFile[$key]) {
-                $unionArray[] = "  {$key}: " . stayBool($value);
+                $unionArray[] = "    {$key}: " . stayBool($value);
             } else {
-                $unionArray[] = "- {$key}: " . stayBool($value);
-                $unionArray[] = "+ {$key}: {$arraySecondFile[$key]}";
+                $unionArray[] = "  - {$key}: " . stayBool($value);
+                $unionArray[] = "  + {$key}: {$arraySecondFile[$key]}";
             }
         }
     }
 
     foreach ($arraySecondFile as $key => $value) {
         if (!array_key_exists($key, $arrayFirstFile)) {
-            $unionArray[] = "+ {$key}: " . stayBool($value);
+            $unionArray[] = "  + {$key}: " . stayBool($value);
         }
     }
 
-    usort($unionArray, function($v1, $v2) {
-        return substr($v1, 2,1) > substr($v2, 2, 1) ? 1 : -1;
+    usort($unionArray, function ($value1, $value2) {
+        return substr($value1, 4, 1) > substr($value2, 4, 1) ? 1 : -1;
     });
 
-    return '{' . PHP_EOL . implode(PHP_EOL, $unionArray) . PHP_EOL . '}';
+    return $unionArray;
 }
 
-//{
-//  - follow: false
-//    host: hexlet.io
-//  - proxy: 123.234.53.22
-//  - timeout: 50
-//  + timeout: 20
-//  + verbose: true
-//};
+function genDiff($pathToFirstFile, $pathToSecondFile): string
+{
+    $arrayFirstFile = getJsonToArray($pathToFirstFile);
+    $arraySecondFile = getJsonToArray($pathToSecondFile);
+    $resultArray = findArrayDiff($arrayFirstFile, $arraySecondFile);
+    return '{' . PHP_EOL . implode(PHP_EOL, $resultArray) . PHP_EOL . '}';
+}
 
-//echo genDiff('file1.json','file2.json') . PHP_EOL;
+//$file1 = ['a' => 'none', 'b' => 'yes', 'c' => 35];
+//$file2 = ['b' => 'no', 'c' => 35, 'd' => 'true'];
+//var_dump(findArrayDiff($file1, $file2));

@@ -9,25 +9,16 @@ class DifferTest extends TestCase
 {
     public function testGenDiff()
     {
-        $pathToFile1 = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'file1.json');
-        $pathToFile2 = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'file2.json');
-        $expected = '{
-            - follow: false
-            host: hexlet.io
-            - proxy: 123.234.53.22
-            - timeout: 50
-            + timeout: 20
-            + verbose: true
-        }';
+        $file1 = __DIR__ . "/fixtures/file1.json";
+        $file2 = __DIR__ . "/fixtures/file2.json";
+        $expected1 = file_get_contents(__DIR__ . "/fixtures/expected1.txt");
+        $this->assertEquals($expected1, genDiff($file1, $file2));
 
-        $this->assertEquals(genDiff($pathToFile1, $pathToFile2), $expected);
-    }
+        $file3 = __DIR__ . "/fixtures/file3.json";
+        $file4 = __DIR__ . "/fixtures/file4.json";
+        $expected2 = file_get_contents(__DIR__ . "/fixtures/expected2.txt");
+        $this->assertEquals($expected2, genDiff($file3, $file4));
 
-    public function testThatGenDiffHasOneRequiredArg()
-    {
-        $pathToFile1 = '';
-        $pathToFile2 = '';
-        $this->assertNull(genDiff($pathToFile1));
-        $this->assertNull(genDiff($pathToFile2));
+        echo "\033[42mTests passed!\033[0m" . PHP_EOL;
     }
 }
