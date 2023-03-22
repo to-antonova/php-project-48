@@ -1,1 +1,1 @@
-{"version":1,"defects":{"Differ\\Tests\\DifferTest::testGenDiff":5},"times":{"Differ\\Tests\\DifferTest::testGenDiff":0.074}}
+{"version":1,"defects":{"Differ\\Tests\\DifferTest::testGenDiff":5},"times":{"Differ\\Tests\\DifferTest::testGenDiff":0.003}}
