@@ -20,6 +20,13 @@ class DifferTest extends TestCase
         $expected2 = file_get_contents(__DIR__ . "/fixtures/expected2.txt");
         $this->assertEquals($expected2, genDiff($file3, $file4));
 
-        echo "\033[42mTests passed!\033[0m" . PHP_EOL;
+        echo "\033[42mJson tests passed!\033[0m" . PHP_EOL;
+
+        $file4 = __DIR__ . "/fixtures/file4.yml";
+        $file5 = __DIR__ . "/fixtures/file5.yml";
+        $expected3 = file_get_contents(__DIR__ . "/fixtures/expected1.txt");
+        $this->assertEquals($expected3, genDiff($file4, $file5));
+
+        echo "\033[42mYaml tests passed!\033[0m" . PHP_EOL;
     }
 }

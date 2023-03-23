@@ -5,7 +5,7 @@
             "Hexlet\\Code\\": "src/"
         },
         "files": [
-            "src/Helper.php",
+            "src/Parsers.php",
             "src/Differ.php"
             ]
     },
@@ -21,7 +21,8 @@
         "bin/gendiff"
     ],
     "require": {
-        "docopt/docopt": "^1.0"
+        "docopt/docopt": "^1.0",
+        "symfony/yaml": "^6.2"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "^3.7",

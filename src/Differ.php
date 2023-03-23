@@ -2,9 +2,11 @@
 
 namespace Differ\Differ;
 
+use function Differ\Parsers\turnIntoArray;
+
 function stayBool($value)
 {
-    if ($value === null) {              //switch case
+    if ($value === null) {
         return "null";
     }
 
@@ -17,17 +19,6 @@ function stayBool($value)
     } else {
         return $value;
     }
-}
-
-function getJsonToArray($pathToFile)
-{
-    if ($pathToFile === false) {
-        return '\033[41mPath error\033[0m' . PHP_EOL;
-    }
-
-    $contentFile =  file_get_contents($pathToFile);
-    return json_decode($contentFile, true);
-//    $jsonFirstFile = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . '../tests/' . $pathToFirstFile);
 }
 
 function findArrayDiff($arrayFirstFile, $arraySecondFile): array
@@ -67,8 +58,8 @@ function findArrayDiff($arrayFirstFile, $arraySecondFile): array
 
 function genDiff($pathToFirstFile, $pathToSecondFile): string
 {
-    $arrayFirstFile = getJsonToArray($pathToFirstFile);
-    $arraySecondFile = getJsonToArray($pathToSecondFile);
+    $arrayFirstFile = turnIntoArray($pathToFirstFile);
+    $arraySecondFile = turnIntoArray($pathToSecondFile);
     $resultArray = findArrayDiff($arrayFirstFile, $arraySecondFile);
     return '{' . PHP_EOL . implode(PHP_EOL, $resultArray) . PHP_EOL . '}';
 }
