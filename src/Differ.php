@@ -4,7 +4,7 @@ namespace Differ\Differ;
 
 function stayBool($value)
 {
-    if ($value === null) {
+    if ($value === null) {              //switch case
         return "null";
     }
 
