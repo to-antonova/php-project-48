@@ -3,8 +3,9 @@
 namespace Differ\Differ;
 
 use function Differ\Parsers\turnIntoArray;
-use function Differ\Formatters\stylish\stylish;
-use function Differ\Formatters\plain\plain;
+use function Differ\Formatters\format;
+
+//use function Differ\Formatters\plain\plain;
 
 const NO_DIFF = '0_NO_DIFF';
 const DIFF_FIRST = '1_DIFF_FIRST';
@@ -95,14 +96,14 @@ function recursiveDiff(array $input): array
     return $out;
 }
 
-function genDiff($pathToFirstFile, $pathToSecondFile, $format)
+function genDiff($pathToFirstFile, $pathToSecondFile, $formatType = 'stylish')
 {
     $arrayFirstFile = turnIntoArray($pathToFirstFile);
     $arraySecondFile = turnIntoArray($pathToSecondFile);
     $resultArray = findArrayDiffRecursive($arrayFirstFile, $arraySecondFile);
     mySort($resultArray);
 //    var_dump($format($resultArray));
-    return $format($resultArray);
+    return format($resultArray, $formatType);
 //    var_dump($resultArray);
 //    return plain($resultArray);   // работает
 }

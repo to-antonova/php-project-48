@@ -90,5 +90,5 @@ function plain(array $array, &$resultArray = [], &$propertyPath = []): string
         array_pop($propertyPath);
     }
 
-    return '{' . PHP_EOL . implode(PHP_EOL, $resultArray) . PHP_EOL . '}';
+    return implode(PHP_EOL, $resultArray);
 }

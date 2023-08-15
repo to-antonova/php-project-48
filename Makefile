@@ -13,7 +13,7 @@ diff-yml-example: # сравнить file3.yml и file4.yml
 diff-recursive-example: # сравнить file5.json и file6.json
 	./bin/gendiff tests/fixtures/file5.json tests/fixtures/file6.json
 diff-plain-example: # плоский формат
-	./bin/gendiff --format plain tests/fixtures/file1.json tests/fixtures/file2.json
+	./bin/gendiff --format plain tests/fixtures/file5.json tests/fixtures/file6.json
 
 lint: # запуск phpcs
 	composer exec --verbose phpcs -- --standard=PSR12 src bin tests

@@ -44,20 +44,20 @@ class DifferTest extends TestCase
         echo "\n\033[42mRecursive Tests passed!\033[0m\n";
     }
 
-//    public function testGenDiffPlain()
-//    {
-//        // плоский формат json
-//        $file5 = __DIR__ . "/fixtures/file5.json";
-//        $file6 = __DIR__ . "/fixtures/file6.json";
-//        $expected5 = file_get_contents(__DIR__ . "/fixtures/expected3.txt");
-//        $this->assertEquals($expected5, genDiff($file5, $file6, 'plain'));
-//
-//        // плоский формат yaml
-//        $file7 = __DIR__ . "/fixtures/file7.yaml";
-//        $file8 = __DIR__ . "/fixtures/file8.yaml";
-//        $expected6 = file_get_contents(__DIR__ . "/fixtures/expected3.txt");
-//        $this->assertEquals($expected6, genDiff($file7, $file8, 'plain'));
-//
-//        echo "\n\033[42mPlain Tests passed!\033[0m\n";
-//    }
+    public function testGenDiffPlain()
+    {
+        // плоский формат json
+        $file5 = __DIR__ . "/fixtures/file5.json";
+        $file6 = __DIR__ . "/fixtures/file6.json";
+        $expected5 = file_get_contents(__DIR__ . "/fixtures/expected3.txt");
+        $this->assertEquals($expected5, genDiff($file5, $file6, 'plain'));
+
+        // плоский формат yaml
+        $file7 = __DIR__ . "/fixtures/file7.yaml";
+        $file8 = __DIR__ . "/fixtures/file8.yaml";
+        $expected6 = file_get_contents(__DIR__ . "/fixtures/expected3.txt");
+        $this->assertEquals($expected6, genDiff($file7, $file8, 'plain'));
+
+        echo "\n\033[42mPlain Tests passed!\033[0m\n";
+    }
 }

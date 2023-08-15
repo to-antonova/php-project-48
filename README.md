@@ -8,10 +8,10 @@
 [![asciicast](https://asciinema.org/a/568786.svg)](https://asciinema.org/a/568786)
 
 Сравнение плоских файлов YAML
+[![asciicast](https://asciinema.org/a/602694.svg)](https://asciinema.org/a/602694)
 
 Рекурсивное сравнение файлов JSON
-
-Рекурсивное сравнение файлов YAML
+[![asciicast](https://asciinema.org/a/602695.svg)](https://asciinema.org/a/602695)
 
 Выбор формата plain
-
+[![asciicast](https://asciinema.org/a/602696.svg)](https://asciinema.org/a/602696)
