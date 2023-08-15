@@ -4,7 +4,14 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/c92eedd6be1214d3964a/maintainability)](https://codeclimate.com/github/to-antonova/php-project-48/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c92eedd6be1214d3964a/test_coverage)](https://codeclimate.com/github/to-antonova/php-project-48/test_coverage)
 
-Сравнение плоских файлов (JSON)
+Сравнение плоских файлов JSON
 [![asciicast](https://asciinema.org/a/568786.svg)](https://asciinema.org/a/568786)
 
-Сравнение плоских файлов (yaml)
+Сравнение плоских файлов YAML
+
+Рекурсивное сравнение файлов JSON
+
+Рекурсивное сравнение файлов YAML
+
+Выбор формата plain
+

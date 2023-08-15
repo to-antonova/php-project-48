@@ -5,9 +5,12 @@
             "Hexlet\\Code\\": "src/"
         },
         "files": [
+            "src/Formatters.php",
             "src/Parsers.php",
-            "src/Differ.php"
-            ]
+            "src/Differ.php",
+            "src/Formatters/stylish.php",
+            "src/Formatters/plain.php"
+        ]
     },
     "authors": [
         {

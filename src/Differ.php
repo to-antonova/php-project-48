@@ -3,6 +3,22 @@
 namespace Differ\Differ;
 
 use function Differ\Parsers\turnIntoArray;
+use function Differ\Formatters\stylish\stylish;
+use function Differ\Formatters\plain\plain;
+
+const NO_DIFF = '0_NO_DIFF';
+const DIFF_FIRST = '1_DIFF_FIRST';
+const DIFF_SECOND = '2_DIFF_SECOND';
+
+function mySort(array &$arr)
+{
+    ksort($arr);
+    foreach ($arr as &$v) {
+        if (is_array($v)) {
+            mySort($v);
+        }
+    }
+}
 
 function stayBool($value)
 {
@@ -21,49 +37,72 @@ function stayBool($value)
     }
 }
 
-function findArrayDiff($arrayFirstFile, $arraySecondFile): array
+function findArrayDiffRecursive($arrayFirstFile, $arraySecondFile): array
 {
-
-    $unionArray = [];
-
-    foreach ($arrayFirstFile as $key => $value) {
-        if (!array_key_exists($key, $arraySecondFile)) {
-            $unionArray[] = "  - {$key}: " . stayBool($value);
-        }
-    }
+    $result = [];
 
     foreach ($arrayFirstFile as $key => $value) {
-        if (array_key_exists($key, $arraySecondFile)) {
-            if ($value === $arraySecondFile[$key]) {
-                $unionArray[] = "    {$key}: " . stayBool($value);
+        if (is_array($arraySecondFile)) {
+            if (array_key_exists($key, $arraySecondFile)) {
+                if (is_array($value) && is_array($arraySecondFile[$key])) {
+                    $result[$key][NO_DIFF] = findArrayDiffRecursive($value, $arraySecondFile[$key]);
+                } elseif (!is_array($value) && !is_array($arraySecondFile[$key]) && $value === $arraySecondFile[$key]) {
+                    $result[$key][NO_DIFF] = stayBool($value);
+                } else {
+                    $result[$key][DIFF_FIRST] = is_array($value) ? recursiveDiff($value) : stayBool($value);
+                    $result[$key][DIFF_SECOND] = is_array($arraySecondFile[$key]) ? recursiveDiff($arraySecondFile[$key]) : stayBool($arraySecondFile[$key]);
+                }
             } else {
-                $unionArray[] = "  - {$key}: " . stayBool($value);
-                $unionArray[] = "  + {$key}: {$arraySecondFile[$key]}";
+                $result[$key][DIFF_FIRST] = is_array($value) ? recursiveDiff($value) : stayBool($value);
+            }
+        } else {
+            if (is_array($value)) {
+                $result[$key][DIFF_FIRST] = recursiveDiff($value);
+                $result[$key][DIFF_SECOND] = stayBool($arraySecondFile);
+            } else {
+                if ($value === $arraySecondFile[$key]) {
+                    $result[$key][NO_DIFF] = stayBool($value);
+                } else {
+                    $result[$key][DIFF_FIRST] = stayBool($value);
+                    $result[$key][DIFF_SECOND] = stayBool($arraySecondFile[$key]);
+                }
             }
         }
     }
 
     foreach ($arraySecondFile as $key => $value) {
-        if (!array_key_exists($key, $arrayFirstFile)) {
-            $unionArray[] = "  + {$key}: " . stayBool($value);
+        if (is_array($arrayFirstFile)) {
+            if (!array_key_exists($key, $arrayFirstFile)) {
+                $result[$key][DIFF_SECOND] = is_array($arraySecondFile[$key]) ? recursiveDiff($arraySecondFile[$key]) : stayBool($arraySecondFile[$key]);
+            }
         }
     }
 
-    usort($unionArray, function ($value1, $value2) {
-        return substr($value1, 4, 1) > substr($value2, 4, 1) ? 1 : -1;
-    });
-
-    return $unionArray;
+    return $result;
 }
 
-function genDiff($pathToFirstFile, $pathToSecondFile): string
+function recursiveDiff(array $input): array
+{
+    $out = [];
+    foreach ($input as $key => $value) {
+        if (is_array($value)) {
+            $out[$key] = recursiveDiff($value);
+            continue;
+        }
+        $out[$key] = stayBool($value);
+    }
+
+    return $out;
+}
+
+function genDiff($pathToFirstFile, $pathToSecondFile, $format)
 {
     $arrayFirstFile = turnIntoArray($pathToFirstFile);
     $arraySecondFile = turnIntoArray($pathToSecondFile);
-    $resultArray = findArrayDiff($arrayFirstFile, $arraySecondFile);
-    return '{' . PHP_EOL . implode(PHP_EOL, $resultArray) . PHP_EOL . '}';
+    $resultArray = findArrayDiffRecursive($arrayFirstFile, $arraySecondFile);
+    mySort($resultArray);
+//    var_dump($format($resultArray));
+    return $format($resultArray);
+//    var_dump($resultArray);
+//    return plain($resultArray);   // работает
 }
-
-//$file1 = ['a' => 'none', 'b' => 'yes', 'c' => 35];
-//$file2 = ['b' => 'no', 'c' => 35, 'd' => 'true'];
-//var_dump(findArrayDiff($file1, $file2));
