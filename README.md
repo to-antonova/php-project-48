@@ -10,8 +10,11 @@
 Сравнение плоских файлов YAML
 [![asciicast](https://asciinema.org/a/602694.svg)](https://asciinema.org/a/602694)
 
-Рекурсивное сравнение файлов JSON
+Рекурсивное сравнение файлов JSON + вывод в формате по умолчанию 'stylish'
 [![asciicast](https://asciinema.org/a/602695.svg)](https://asciinema.org/a/602695)
 
 Выбор формата plain
 [![asciicast](https://asciinema.org/a/602696.svg)](https://asciinema.org/a/602696)
+
+Выбор формата json
+[![asciicast](https://asciinema.org/a/602965.svg)](https://asciinema.org/a/602965)

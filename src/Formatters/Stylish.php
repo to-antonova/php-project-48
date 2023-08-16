@@ -1,12 +1,27 @@
 <?php
 
-namespace Differ\Formatters\stylish;
-
-//use function Differ\Differ\stayBool;
+namespace Differ\Formatters\Stylish;
 
 const NO_DIFF = '0_NO_DIFF';
 const DIFF_FIRST = '1_DIFF_FIRST';
 const DIFF_SECOND = '2_DIFF_SECOND';
+
+function stayBool($value)
+{
+    if ($value === null) {
+        return "null";
+    }
+
+    if ($value === true) {
+        return "true";
+    }
+
+    if ($value === false) {
+        return "false";
+    } else {
+        return $value;
+    }
+}
 
 function chooseSign($value): string
 {
@@ -36,7 +51,7 @@ function getIndent($depth): string
     return str_repeat('  ', $depth);        // для наглядности можно заменить пробелы точками
 }
 
-function stylish(array $array, &$resultArray = [], $depth = 1): string
+function toStylish(array $array, &$resultArray = [], $depth = 1): string
 {
     $indent = getIndent($depth);
     $currentIndent = getIndent($depth + 1);
@@ -51,42 +66,43 @@ function stylish(array $array, &$resultArray = [], $depth = 1): string
                 $sign = chooseSign($arrayValueKey);
 
                 if (is_array($arrayValueValue)) {
-                    $resultArray[] = "{$indent}{$sign}{$arrayKey}: {";
+                    $resultArray[] = sprintf('%s%s%s: {', $indent, $sign, stayBool($arrayKey));
                     if (!isDiffKey($arrayValueKey)) {
-                        $resultArray[] = "{$indent}{$indent}{$arrayValueKey}: {";
+                        $resultArray[] = sprintf('%s%s%s: {', $indent, $indent, stayBool($arrayValueKey));
                         foreach ($arrayValueValue as $k => $v) {
                             if (!is_array($v)) {
-                                $resultArray[] = "{$currentIndent}{$currentIndent}{$k}: {$v}";
+                                $resultArray[] = sprintf('%s%s%s: %s', $currentIndent, $currentIndent, $k, stayBool($v));
                             } else {
-                                stylish($v, $resultArray, $depth + 3);
+                                toStylish($v, $resultArray, $depth + 3);
                             }
                         }
                         $resultArray[] = "{$currentIndent}    }";       // здесь вместо sign 4 пробела
                         $resultArray[] = "{$currentIndent}}";
                         continue;
                     }
-                    stylish($arrayValueValue, $resultArray, $depth + 2);
+                    toStylish($arrayValueValue, $resultArray, $depth + 2);
 
                 } else {
                     if (isDiffKey($arrayValueKey)) {
                         if ($arrayValueValue === "") {
                             // костыль, чтобы wow с пустым значением выводился корректно
                             // в файл expected2.txt не могу добавить пробел после wow, автоматически удаляется
-                            $resultArray[] = "{$indent}{$sign}{$arrayKey}:";
+                            $resultArray[] = sprintf('%s%s%s:', $indent, $sign, stayBool($arrayKey));
                             continue;
                         }
-                        $resultArray[] = "{$indent}{$sign}{$arrayKey}: {$arrayValueValue}";
+                        $resultArray[] = sprintf('%s%s%s: %s', $indent, $sign, $arrayKey, stayBool($arrayValueValue));
                         continue;
                     } else {
-                        $resultArray[] = "{$indent}{$sign}{$arrayKey}: {";
-                        $resultArray[] = "{$indent}{$indent}{$arrayValueKey}: {$arrayValueValue}";
+                        $resultArray[] = sprintf('%s%s%s: {', $indent, $sign, stayBool($arrayKey));
+                        $resultArray[] = sprintf('%s%s%s: %s', $indent, $indent, $arrayValueKey, stayBool($arrayValueValue));
                     }
                 }
 
                 $resultArray[] = "{$currentIndent}}";
             }
         } else {
-            $resultArray[] = "{$currentIndent}{$arrayKey}: {$arrayValue}";
+            $resultArray[] = sprintf('%s%s: %s', $currentIndent, $arrayKey, $arrayValue);
+
         }
     }
 

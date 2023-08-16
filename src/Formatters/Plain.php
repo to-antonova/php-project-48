@@ -1,12 +1,27 @@
 <?php
 
-namespace Differ\Formatters\plain;
+namespace Differ\Formatters\Plain;
 
 const NO_DIFF = '0_NO_DIFF';
 const DIFF_FIRST = '1_DIFF_FIRST';
 const DIFF_SECOND = '2_DIFF_SECOND';
 
-use function Differ\Differ\stayBool;
+function stayBool($value)
+{
+    if ($value === null) {
+        return "null";
+    }
+
+    if ($value === true) {
+        return "true";
+    }
+
+    if ($value === false) {
+        return "false";
+    } else {
+        return $value;
+    }
+}
 
 function isComplexValue($value)
 {
@@ -28,7 +43,7 @@ function isComplexValue($value)
 }
 
 
-function plain(array $array, &$resultArray = [], &$propertyPath = []): string
+function toPlain(array $array, &$resultArray = [], &$propertyPath = []): string
 {
     foreach ($array as $arrayKey => $arrayValue) {
 //        var_dump($arrayKey);      // common, group1, group2, group3
@@ -39,7 +54,7 @@ function plain(array $array, &$resultArray = [], &$propertyPath = []): string
             foreach ($arrayValue as $arrayValueKey => $arrayValueValue) {
 //                var_dump($arrayValueKey);       // NO_DIFF, DIFF_FIRST, DIFF_SECOND  в изначальном массиве
 
-                if (count($arrayValue) === 1) {
+                if (count($arrayValue) === 1) {     // сделать switch
                     if ($arrayValueKey === DIFF_FIRST) {
                         $path = implode(".", $propertyPath);
                         $resultArray[] = "Property '{$path}' was removed";
@@ -54,7 +69,7 @@ function plain(array $array, &$resultArray = [], &$propertyPath = []): string
                 }
 
                 if (is_array($arrayValueValue)) {
-                    plain($arrayValueValue, $resultArray, $propertyPath);
+                    toPlain($arrayValueValue, $resultArray, $propertyPath);
                     continue;
                 }
 
