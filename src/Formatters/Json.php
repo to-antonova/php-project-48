@@ -60,4 +60,3 @@ function toJson(array $array, &$resultArray = []): string
 
     return json_encode($resultArray, JSON_PRETTY_PRINT);    // ориентир
 }
-

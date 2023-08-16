@@ -71,7 +71,13 @@ function toStylish(array $array, &$resultArray = [], $depth = 1): string
                         $resultArray[] = sprintf('%s%s%s: {', $indent, $indent, stayBool($arrayValueKey));
                         foreach ($arrayValueValue as $k => $v) {
                             if (!is_array($v)) {
-                                $resultArray[] = sprintf('%s%s%s: %s', $currentIndent, $currentIndent, $k, stayBool($v));
+                                $resultArray[] = sprintf(
+                                    '%s%s%s: %s',
+                                    $currentIndent,
+                                    $currentIndent,
+                                    $k,
+                                    stayBool($v)
+                                );
                             } else {
                                 toStylish($v, $resultArray, $depth + 3);
                             }
@@ -81,7 +87,6 @@ function toStylish(array $array, &$resultArray = [], $depth = 1): string
                         continue;
                     }
                     toStylish($arrayValueValue, $resultArray, $depth + 2);
-
                 } else {
                     if (isDiffKey($arrayValueKey)) {
                         if ($arrayValueValue === "") {
@@ -94,7 +99,13 @@ function toStylish(array $array, &$resultArray = [], $depth = 1): string
                         continue;
                     } else {
                         $resultArray[] = sprintf('%s%s%s: {', $indent, $sign, stayBool($arrayKey));
-                        $resultArray[] = sprintf('%s%s%s: %s', $indent, $indent, $arrayValueKey, stayBool($arrayValueValue));
+                        $resultArray[] = sprintf(
+                            '%s%s%s: %s',
+                            $indent,
+                            $indent,
+                            $arrayValueKey,
+                            stayBool($arrayValueValue)
+                        );
                     }
                 }
 
@@ -102,7 +113,6 @@ function toStylish(array $array, &$resultArray = [], $depth = 1): string
             }
         } else {
             $resultArray[] = sprintf('%s%s: %s', $currentIndent, $arrayKey, $arrayValue);
-
         }
     }
 
