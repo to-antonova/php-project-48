@@ -2,10 +2,10 @@
 
 namespace Differ\Differ;
 
+use function Differ\Formatters\Plain\toPlain;
+use function Differ\Formatters\Stylish\toStylish;
 use function Differ\Parsers\turnIntoArray;
 use function Differ\Formatters\format;
-
-//use function Differ\Formatters\plain\plain;
 
 const NO_DIFF = '0_NO_DIFF';
 const DIFF_FIRST = '1_DIFF_FIRST';
@@ -20,8 +20,6 @@ function mySort(array &$arr)
         }
     }
 }
-
-
 
 function findArrayDiffRecursive($arrayFirstFile, $arraySecondFile): array
 {
@@ -83,14 +81,71 @@ function recursiveDiff(array $input): array
     return $out;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////
+function formattish(array $array, &$resultArray = [])
+{
+    foreach ($array as $arrayKey => $arrayValue) {
+//        var_dump($arrayKey);      // common, group1, group2, group3
+
+        if (is_array($arrayValue)) {
+            foreach ($arrayValue as $arrayValueKey => $arrayValueValue) {
+//                var_dump($arrayValueKey);       // NO_DIFF, DIFF_FIRST, DIFF_SECOND  в изначальном массиве
+
+                if (count($arrayValue) === 1) {     // сделать switch
+                    if ($arrayValueKey === DIFF_FIRST) {
+                        $resultArray[$arrayKey]["status"] = "removed";
+                        $resultArray[$arrayKey]["value"] = $arrayValueValue;
+                        continue;
+                    }
+                    if ($arrayValueKey === DIFF_SECOND) {
+                        $resultArray[$arrayKey]["status"] = "added";
+                        $resultArray[$arrayKey]["value"] = $arrayValueValue;
+                        continue;
+                    }
+                }
+
+
+                if (is_array($arrayValueValue)) {
+                    $resultArray[$arrayKey] = [];
+                    formattish($arrayValueValue, $resultArray[$arrayKey]);
+                    continue;
+                }
+
+                // если свойство есть в обоих массивах с одинаковыми значениями
+                if ($arrayValueKey === NO_DIFF) {
+                    $resultArray[$arrayKey]["status"] = "unchanged";
+                    $resultArray[$arrayKey]["value"] = $arrayValueValue;
+                    continue;
+                }
+
+                // если свойство есть в обоих массивах, но с разными значениями
+                if (array_key_exists(DIFF_FIRST, $arrayValue) && array_key_exists(DIFF_SECOND, $arrayValue)) {
+                    $resultArray[$arrayKey]["status"] = "updated";
+                    $resultArray[$arrayKey]["value1"] = $arrayValue[DIFF_FIRST];
+                    $resultArray[$arrayKey]["value2"] = $arrayValue[DIFF_SECOND];
+
+                    // если значение есть только в первом массиве
+                } elseif (!array_key_exists(DIFF_SECOND, $arrayValue)) {
+                    $resultArray[$arrayKey]["status"] = "removed";
+
+                    // если значение есть только во втором массиве
+                } elseif (!array_key_exists(DIFF_FIRST, $arrayValue)) {
+                    $resultArray[$arrayKey]["status"] = "added";
+                    $resultArray[$arrayKey]["value"] = $arrayValueValue;
+                }
+            }
+        }
+    }
+    return $resultArray;
+}
+
 function genDiff($pathToFirstFile, $pathToSecondFile, $formatType = 'stylish')
 {
     $arrayFirstFile = turnIntoArray($pathToFirstFile);
     $arraySecondFile = turnIntoArray($pathToSecondFile);
     $resultArray = findArrayDiffRecursive($arrayFirstFile, $arraySecondFile);
-    mySort($resultArray);
-//    var_dump($format($resultArray));
-    return format($resultArray, $formatType);
-//    var_dump($resultArray);
-//    return plain($resultArray);   // работает
+
+    $result = formattish($resultArray);
+    mySort($result);
+    return format($result, $formatType);
 }

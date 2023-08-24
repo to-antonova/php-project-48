@@ -2,10 +2,6 @@
 
 namespace Differ\Formatters\Plain;
 
-const NO_DIFF = '0_NO_DIFF';
-const DIFF_FIRST = '1_DIFF_FIRST';
-const DIFF_SECOND = '2_DIFF_SECOND';
-
 function stayBool($value)
 {
     if ($value === null) {
@@ -42,65 +38,43 @@ function isComplexValue($value)
     }
 }
 
-
 function toPlain(array $array, &$resultArray = [], &$propertyPath = []): string
 {
     foreach ($array as $arrayKey => $arrayValue) {
-//        var_dump($arrayKey);      // common, group1, group2, group3
         $propertyPath[] = $arrayKey;
-//        var_dump($propertyPath);
 
-        if (is_array($arrayValue)) {
-            foreach ($arrayValue as $arrayValueKey => $arrayValueValue) {
-//                var_dump($arrayValueKey);       // NO_DIFF, DIFF_FIRST, DIFF_SECOND  в изначальном массиве
+        if (!array_key_exists("status", $arrayValue)) {
+            toPlain($arrayValue, $resultArray, $propertyPath);
+            array_pop($propertyPath);
+            continue;
+        }
 
-                if (count($arrayValue) === 1) {     // сделать switch
-                    if ($arrayValueKey === DIFF_FIRST) {
-                        $path = implode(".", $propertyPath);
-                        $resultArray[] = "Property '{$path}' was removed";
-                        continue;
-                    }
-                    if ($arrayValueKey === DIFF_SECOND) {
-                        $path = implode(".", $propertyPath);
-                        $value = isComplexValue($arrayValueValue);
-                        $resultArray[] = "Property '{$path}' was added with value: {$value}";
-                        continue;
-                    }
-                }
+        // если свойство есть в обоих массивах с одинаковыми значениями
+        if ($arrayValue["status"] === "unchanged") {
+            array_pop($propertyPath);
+            continue;
 
-                if (is_array($arrayValueValue)) {
-                    toPlain($arrayValueValue, $resultArray, $propertyPath);
-                    continue;
-                }
-
-                // если свойство есть в обоих массивах с одинаковыми значениями
-                if ($arrayValueKey === NO_DIFF) {
-                    continue;
-                }
-
-                // если свойство есть в обоих массивах, но с разными значениями
-                if (array_key_exists(DIFF_FIRST, $arrayValue) && array_key_exists(DIFF_SECOND, $arrayValue)) {
-                    $value1 = isComplexValue($arrayValue[DIFF_FIRST]);
-                    $value2 = isComplexValue($arrayValue[DIFF_SECOND]);
-                    $path = implode(".", $propertyPath);
-                    $string = "Property '{$path}' was updated. From {$value1} to {$value2}";
-                    // чтобы не было дублирования строк
-                    if (!in_array($string, $resultArray)) {
-                        $resultArray[] = $string;
-                    }
-
-                // если значение есть только в первом массиве
-                } elseif (!array_key_exists(DIFF_SECOND, $arrayValue)) {
-                    $path = implode(".", $propertyPath);
-                    $resultArray[] = "Property '{$path}' was removed";
-
-                // если значение есть только во втором массиве
-                } elseif (!array_key_exists(DIFF_FIRST, $arrayValue)) {
-                    $path = implode(".", $propertyPath);
-                    $value = isComplexValue($arrayValueValue);
-                    $resultArray[] = "Property '{$path}' was added with value: {$value}";
-                }
+        // если свойство есть в обоих массивах, но с разными значениями
+        } elseif ($arrayValue["status"] === "updated") {
+            $value1 = isComplexValue($arrayValue["value1"]);
+            $value2 = isComplexValue($arrayValue["value2"]);
+            $path = implode(".", $propertyPath);
+            $string = "Property '{$path}' was updated. From {$value1} to {$value2}";
+            // чтобы не было дублирования строк
+            if (!in_array($string, $resultArray)) {
+                $resultArray[] = $string;
             }
+
+        // если значение есть только в первом массиве
+        } elseif ($arrayValue["status"] === "removed") {
+            $path = implode(".", $propertyPath);
+            $resultArray[] = "Property '{$path}' was removed";
+
+        // если значение есть только во втором массиве
+        } elseif ($arrayValue["status"] === "added") {
+            $path = implode(".", $propertyPath);
+            $value = isComplexValue($arrayValue["value"]);
+            $resultArray[] = "Property '{$path}' was added with value: {$value}";
         }
         array_pop($propertyPath);
     }

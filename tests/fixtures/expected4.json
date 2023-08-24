@@ -4,13 +4,18 @@
             "status": "added",
             "value": false
         },
+        "setting1": {
+            "status": "unchanged",
+            "value": "Value 1"
+        },
         "setting2": {
-            "status": "removed"
+            "status": "removed",
+            "value": 200
         },
         "setting3": {
             "status": "updated",
-            "oldvalue": true,
-            "newvalue": null
+            "value1": true,
+            "value2": null
         },
         "setting4": {
             "status": "added",
@@ -26,9 +31,13 @@
             "doge": {
                 "wow": {
                     "status": "updated",
-                    "oldvalue": "",
-                    "newvalue": "so much"
+                    "value1": "",
+                    "value2": "so much"
                 }
+            },
+            "key": {
+                "status": "unchanged",
+                "value": "value"
             },
             "ops": {
                 "status": "added",
@@ -39,19 +48,29 @@
     "group1": {
         "baz": {
             "status": "updated",
-            "oldvalue": "bas",
-            "newvalue": "bars"
+            "value1": "bas",
+            "value2": "bars"
+        },
+        "foo": {
+            "status": "unchanged",
+            "value": "bar"
         },
         "nest": {
             "status": "updated",
-            "oldvalue": {
+            "value1": {
                 "key": "value"
             },
-            "newvalue": "str"
+            "value2": "str"
         }
     },
     "group2": {
-        "status": "removed"
+        "status": "removed",
+        "value": {
+            "abc": 12345,
+            "deep": {
+                "id": 45
+            }
+        }
     },
     "group3": {
         "status": "added",

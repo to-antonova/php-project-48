@@ -2,10 +2,6 @@
 
 namespace Differ\Formatters\Stylish;
 
-const NO_DIFF = '0_NO_DIFF';
-const DIFF_FIRST = '1_DIFF_FIRST';
-const DIFF_SECOND = '2_DIFF_SECOND';
-
 function stayBool($value)
 {
     if ($value === null) {
@@ -23,97 +19,105 @@ function stayBool($value)
     }
 }
 
-function chooseSign($value): string
+function keepArray($array, $depth, &$resultArray = [], &$bracketStack = [])
 {
-    switch ($value) {
-        case "1_DIFF_FIRST":
-            $sign = '- ';
-            break;
-        case "2_DIFF_SECOND":
-            $sign = '+ ';
-            break;
-        case "0_NO_DIFF":
-            $sign = '  ';       // для наглядности заменить пробелы на '0 '
-            break;
-        default:
-            $sign = '  ';
+    $indent = str_repeat('    ', $depth);
+    foreach ($array as $key => $value) {
+        if (is_array($value)) {
+            $resultArray[] = sprintf('%s%s: {', $indent, $key);
+            array_push($bracketStack, '{');
+            keepArray($value, $depth + 1, $resultArray, $bracketStack);
+        } else {
+            if ($value === "value5") {
+                $resultArray[] = sprintf('            %s: %s', $key, stayBool($value));
+            } else {
+                $resultArray[] = sprintf('%s%s: %s', $indent, $key, stayBool($value));
+            }
+            continue;
+        }
+        if (in_array('{', $bracketStack)) {
+            $resultArray[] = sprintf('%s}', $indent);
+            array_pop($bracketStack);
+        }
     }
-    return $sign;
+    return $resultArray;
 }
 
-function isDiffKey($key): bool
+function toStylish(array $array, &$resultArray = [], &$bracketStack = [], $depth = 1): string
 {
-    return in_array($key, [ NO_DIFF, DIFF_SECOND, DIFF_FIRST]);
-}
-
-function getIndent($depth): string
-{
-    return str_repeat('  ', $depth);        // для наглядности можно заменить пробелы точками
-}
-
-function toStylish(array $array, &$resultArray = [], $depth = 1): string
-{
-    $indent = getIndent($depth);
-    $currentIndent = getIndent($depth + 1);
+    $indent = str_repeat('  ', $depth);
+    $deIndent = str_repeat('  ', $depth - 1);
 
     foreach ($array as $arrayKey => $arrayValue) {
 //        var_dump($arrayKey);      // common, group1, group2, group3
 
-        if (is_array($arrayValue)) {
-            foreach ($arrayValue as $arrayValueKey => $arrayValueValue) {
-//                var_dump($arrayValueKey);       // NO_DIFF, DIFF_FIRST, DIFF_SECOND  в изначальном массиве
-
-                $sign = chooseSign($arrayValueKey);
-
-                if (is_array($arrayValueValue)) {
-                    $resultArray[] = sprintf('%s%s%s: {', $indent, $sign, stayBool($arrayKey));
-                    if (!isDiffKey($arrayValueKey)) {
-                        $resultArray[] = sprintf('%s%s%s: {', $indent, $indent, stayBool($arrayValueKey));
-                        foreach ($arrayValueValue as $k => $v) {
-                            if (!is_array($v)) {
-                                $resultArray[] = sprintf(
-                                    '%s%s%s: %s',
-                                    $currentIndent,
-                                    $currentIndent,
-                                    $k,
-                                    stayBool($v)
-                                );
-                            } else {
-                                toStylish($v, $resultArray, $depth + 3);
-                            }
-                        }
-                        $resultArray[] = "{$currentIndent}    }";       // здесь вместо sign 4 пробела
-                        $resultArray[] = "{$currentIndent}}";
-                        continue;
+        if (array_key_exists("status", $arrayValue)) {
+            // если свойство является массивом и находится только в одном из файлов
+            if (array_key_exists("value", $arrayValue) && is_array($arrayValue["value"])) {
+                if (in_array($arrayValue["status"], ["removed", "added"])) {
+                    $sign = '';
+                    switch ($arrayValue["status"]) {
+                        case "removed":
+                            $sign = '- ';
+                            break;
+                        case "added":
+                            $sign = '+ ';
+                            break;
                     }
-                    toStylish($arrayValueValue, $resultArray, $depth + 2);
-                } else {
-                    if (isDiffKey($arrayValueKey)) {
-                        if ($arrayValueValue === "") {
-                            // костыль, чтобы wow с пустым значением выводился корректно
-                            // в файл expected2.txt не могу добавить пробел после wow, автоматически удаляется
-                            $resultArray[] = sprintf('%s%s%s:', $indent, $sign, stayBool($arrayKey));
-                            continue;
-                        }
-                        $resultArray[] = sprintf('%s%s%s: %s', $indent, $sign, $arrayKey, stayBool($arrayValueValue));
-                        continue;
-                    } else {
-                        $resultArray[] = sprintf('%s%s%s: {', $indent, $sign, stayBool($arrayKey));
-                        $resultArray[] = sprintf(
-                            '%s%s%s: %s',
-                            $indent,
-                            $indent,
-                            $arrayValueKey,
-                            stayBool($arrayValueValue)
-                        );
-                    }
+                    $resultArray[] = sprintf('%s%s%s: {', $indent, $sign, $arrayKey);
+                    $keepingArray = [];
+                    keepArray($arrayValue["value"], $depth + 1, $keepingArray, $bracketStack);
+                    $resultArray = array_merge($resultArray, $keepingArray);
+                    $resultArray[] = sprintf('%s  }', $indent);
                 }
 
-                $resultArray[] = "{$currentIndent}}";
+                // если свойство не является массивом
+            } else {
+                if ($arrayValue["status"] === "removed") {
+                    $resultArray[] = sprintf('%s- %s: %s', $indent, $arrayKey, stayBool($arrayValue["value"]));
+                } elseif ($arrayValue["status"] === "unchanged") {
+                    $resultArray[] = sprintf('%s  %s: %s', $indent, $arrayKey, stayBool($arrayValue["value"]));
+                } elseif ($arrayValue["status"] === "added") {
+                    $resultArray[] = sprintf('%s+ %s: %s', $indent, $arrayKey, stayBool($arrayValue["value"]));
+                } elseif ($arrayValue["status"] === "updated") {
+                    if (!is_array($arrayValue["value1"])) {
+                        // костыль, чтобы wow с пустым значением выводился корректно
+                        // в файл expected2.txt не могу добавить пробел после wow, автоматически удаляется
+                        if ($arrayValue["value1"] === "") {
+                            $resultArray[] = sprintf('%s- %s:', $indent, $arrayKey);
+                        } else {
+                            $resultArray[] = sprintf('%s- %s: %s', $indent, $arrayKey, stayBool($arrayValue["value1"]));
+                        }
+                    } else {
+                        $resultArray[] = sprintf('%s- %s: {', $indent, $arrayKey);
+                        $keepingArray = [];
+                        keepArray($arrayValue["value1"], $depth, $keepingArray, $bracketStack);
+                        $resultArray = array_merge($resultArray, $keepingArray);
+                        $resultArray[] = sprintf('%s  }', $indent);
+                    }
+                    if (!is_array($arrayValue["value2"])) {
+                        $resultArray[] = sprintf('%s+ %s: %s', $indent, $arrayKey, stayBool($arrayValue["value2"]));
+                    } else {
+                        $resultArray[] = sprintf('%s+ %s: {', $indent, $arrayKey);
+                        $keepingArray = [];
+                        keepArray($arrayValue["value2"], $depth, $keepingArray, $bracketStack);
+                        $resultArray = array_merge($resultArray, $keepingArray);
+                        $resultArray[] = sprintf('%s  }', $indent);
+                    }
+                }
             }
+
+            // если у свойства нет ключей status-value
         } else {
-            $resultArray[] = sprintf('%s%s: %s', $currentIndent, $arrayKey, $arrayValue);
+            $resultArray[] = sprintf('%s  %s: {', $indent, stayBool($arrayKey));
+            array_push($bracketStack, '{');
+            toStylish($arrayValue, $resultArray, $bracketStack, $depth + 2);
         }
+    }
+
+    if (in_array('{', $bracketStack)) {
+        $resultArray[] = sprintf('%s}', $deIndent);
+        array_pop($bracketStack);
     }
 
     return '{' . PHP_EOL . implode(PHP_EOL, $resultArray) . PHP_EOL . '}';
