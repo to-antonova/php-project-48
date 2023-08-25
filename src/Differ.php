@@ -19,7 +19,7 @@ function mySort(array &$arr)
     }
 }
 
-function findArrayDiffRecursive($arrayFirstFile, $arraySecondFile): array
+function findArrayDiffRecursive(array $arrayFirstFile, array $arraySecondFile): array
 {
     $result = [];
 
@@ -80,7 +80,7 @@ function recursiveDiff(array $input): array
 }
 
 /////////////////////////////////////////////////////////////////////////////////////
-function formattish(array $array, &$resultArray = [])
+function formattish(array $array, array|null &$resultArray = []): array|null
 {
     foreach ($array as $arrayKey => $arrayValue) {
 //        var_dump($arrayKey);      // common, group1, group2, group3
@@ -137,7 +137,7 @@ function formattish(array $array, &$resultArray = [])
     return $resultArray;
 }
 
-function genDiff($pathToFirstFile, $pathToSecondFile, $formatType = 'stylish')
+function genDiff(string $pathToFirstFile, string $pathToSecondFile, string $formatType = 'stylish'): string
 {
     $arrayFirstFile = turnIntoArray($pathToFirstFile);
     $arraySecondFile = turnIntoArray($pathToSecondFile);

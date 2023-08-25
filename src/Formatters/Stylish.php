@@ -2,7 +2,7 @@
 
 namespace Differ\Formatters\Stylish;
 
-function stayBool($value)
+function stayBool(mixed $value): string
 {
     if ($value === null) {
         return "null";
@@ -19,7 +19,7 @@ function stayBool($value)
     }
 }
 
-function keepArray($array, $depth, &$resultArray = [], &$bracketStack = [])
+function keepArray(array $array, int $depth, array &$resultArray = [], array &$bracketStack = []): array
 {
     $indent = str_repeat('    ', $depth);
     foreach ($array as $key => $value) {
@@ -35,7 +35,7 @@ function keepArray($array, $depth, &$resultArray = [], &$bracketStack = [])
             }
             continue;
         }
-        if (in_array('{', $bracketStack)) {
+        if (in_array('{', $bracketStack, true)) {
             $resultArray[] = sprintf('%s}', $indent);
             array_pop($bracketStack);
         }
@@ -43,7 +43,7 @@ function keepArray($array, $depth, &$resultArray = [], &$bracketStack = [])
     return $resultArray;
 }
 
-function toStylish(array $array, &$resultArray = [], &$bracketStack = [], $depth = 1): string
+function toStylish(array $array, array &$resultArray = [], array &$bracketStack = [], int $depth = 1): string
 {
     $indent = str_repeat('  ', $depth);
     $deIndent = str_repeat('  ', $depth - 1);
@@ -54,7 +54,7 @@ function toStylish(array $array, &$resultArray = [], &$bracketStack = [], $depth
         if (array_key_exists("status", $arrayValue)) {
             // если свойство является массивом и находится только в одном из файлов
             if (array_key_exists("value", $arrayValue) && is_array($arrayValue["value"])) {
-                if (in_array($arrayValue["status"], ["removed", "added"])) {
+                if (in_array($arrayValue["status"], ["removed", "added"], true)) {
                     $sign = '';
                     switch ($arrayValue["status"]) {
                         case "removed":
@@ -115,7 +115,7 @@ function toStylish(array $array, &$resultArray = [], &$bracketStack = [], $depth
         }
     }
 
-    if (in_array('{', $bracketStack)) {
+    if (in_array('{', $bracketStack, true)) {
         $resultArray[] = sprintf('%s}', $deIndent);
         array_pop($bracketStack);
     }

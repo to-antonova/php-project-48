@@ -5,7 +5,7 @@ namespace Differ\Parsers;
 use Symfony\Component\Yaml\Yaml;
 use Exception;
 
-function turnIntoArray($pathToFile)
+function turnIntoArray(string|false $pathToFile)
 {
     if ($pathToFile === false) {
         return '\033[41mPath Error!\033[0m' . PHP_EOL;

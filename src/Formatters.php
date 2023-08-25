@@ -2,11 +2,12 @@
 
 namespace Differ\Formatters;
 
+use Exception;
 use Differ\Formatters\Stylish;
 use Differ\Formatters\Plain;
 use Differ\Formatters\Json;
 
-function format($array, $formatType): string
+function format(array $array, string $formatType): string
 {
     switch ($formatType) {
         case 'stylish':

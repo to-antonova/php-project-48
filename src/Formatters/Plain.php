@@ -2,7 +2,7 @@
 
 namespace Differ\Formatters\Plain;
 
-function stayBool($value)
+function stayBool(mixed $value): string
 {
     if ($value === null) {
         return "null";
@@ -19,7 +19,7 @@ function stayBool($value)
     }
 }
 
-function isComplexValue($value)
+function isComplexValue(mixed $value): string
 {
     if (is_array($value)) {
         return "[complex value]";
@@ -38,7 +38,7 @@ function isComplexValue($value)
     }
 }
 
-function toPlain(array $array, &$resultArray = [], &$propertyPath = []): string
+function toPlain(array $array, array &$resultArray = [], array &$propertyPath = []): string
 {
     foreach ($array as $arrayKey => $arrayValue) {
         $propertyPath[] = $arrayKey;
@@ -61,7 +61,7 @@ function toPlain(array $array, &$resultArray = [], &$propertyPath = []): string
             $path = implode(".", $propertyPath);
             $string = "Property '{$path}' was updated. From {$value1} to {$value2}";
             // чтобы не было дублирования строк
-            if (!in_array($string, $resultArray)) {
+            if (!in_array($string, $resultArray, true)) {
                 $resultArray[] = $string;
             }
 
