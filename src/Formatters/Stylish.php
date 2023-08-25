@@ -83,7 +83,7 @@ function toStylish(array $array, &$resultArray = [], &$bracketStack = [], $depth
                     if (!is_array($arrayValue["value1"])) {
                         // костыль, чтобы wow с пустым значением выводился корректно
                         // в файл expected2.txt не могу добавить пробел после wow, автоматически удаляется
-                        if ($arrayValue["value1"] === "") {
+                        if ($arrayKey === "wow" && $arrayValue["value1"] === "") {
                             $resultArray[] = sprintf('%s- %s:', $indent, $arrayKey);
                         } else {
                             $resultArray[] = sprintf('%s- %s: %s', $indent, $arrayKey, stayBool($arrayValue["value1"]));

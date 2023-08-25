@@ -144,7 +144,8 @@ function genDiff($pathToFirstFile, $pathToSecondFile, $formatType = 'stylish')
     $arrayFirstFile = turnIntoArray($pathToFirstFile);
     $arraySecondFile = turnIntoArray($pathToSecondFile);
     $resultArray = findArrayDiffRecursive($arrayFirstFile, $arraySecondFile);
-
+    var_dump($arrayFirstFile);
+    var_dump($arraySecondFile);
     $result = formattish($resultArray);
     mySort($result);
     return format($result, $formatType);
