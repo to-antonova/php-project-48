@@ -2,8 +2,6 @@
 
 namespace Differ\Differ;
 
-use function Differ\Formatters\Plain\toPlain;
-use function Differ\Formatters\Stylish\toStylish;
 use function Differ\Parsers\turnIntoArray;
 use function Differ\Formatters\format;
 
@@ -106,7 +104,7 @@ function formattish(array $array, &$resultArray = [])
 
 
                 if (is_array($arrayValueValue)) {
-                    $resultArray[$arrayKey] = [];
+//                    $resultArray[$arrayKey] = [];
                     formattish($arrayValueValue, $resultArray[$arrayKey]);
                     continue;
                 }
@@ -144,8 +142,6 @@ function genDiff($pathToFirstFile, $pathToSecondFile, $formatType = 'stylish')
     $arrayFirstFile = turnIntoArray($pathToFirstFile);
     $arraySecondFile = turnIntoArray($pathToSecondFile);
     $resultArray = findArrayDiffRecursive($arrayFirstFile, $arraySecondFile);
-    var_dump($arrayFirstFile);
-    var_dump($arraySecondFile);
     $result = formattish($resultArray);
     mySort($result);
     return format($result, $formatType);
