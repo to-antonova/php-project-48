@@ -4,7 +4,7 @@ namespace Differ\Formatters\Plain;
 
 use function Functional\flatten;
 
-function stayBool($value)
+function stayBool(mixed $value)
 {
     if ($value === true) {
         return "true";

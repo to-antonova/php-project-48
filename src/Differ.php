@@ -5,7 +5,7 @@ namespace Differ\Differ;
 use function Differ\Parsers\turnIntoArray;
 use function Differ\Formatters\format;
 
-function cmp($a, $b)
+function cmp(array $a, array $b)
 {
     if ($a['key'] == $b['key']) {
         return 0;
@@ -13,15 +13,17 @@ function cmp($a, $b)
     return ($a['key'] < $b['key']) ? -1 : 1;
 }
 
-function mySort($a)
+function mySort(array $a)
 {
-    usort($a, 'Differ\Differ\cmp');
+    $newA = $a;
+    usort($newA, 'Differ\Differ\cmp');
     return array_map(function ($v) {
-        if (array_key_exists('children', $v)) {
-            $v['children'] = mySort($v['children']);
+        $newV = $v;
+        if (array_key_exists('children', $newV)) {
+            $newV['children'] = mySort($v['children']);
         }
-        return $v;
-    }, $a);
+        return $newV;
+    }, $newA);
 }
 
 function findArrayDiff(array $arrayFirstFile, array $arraySecondFile): array

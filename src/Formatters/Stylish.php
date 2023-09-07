@@ -12,7 +12,7 @@ function formatArray(array $node): array
     }, $keys);
 }
 
-function stringify($value, int $depth): string
+function stringify(mixed $value, int $depth): string
 {
     if ($value === true) {
         return 'true';

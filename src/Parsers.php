@@ -11,7 +11,7 @@ function turnIntoArray(string $pathToFile)
         return '\033[41mPath Error!\033[0m' . PHP_EOL;
     }
 
-    $fileContent = file_get_contents($pathToFile);
+    $fileContent = (string) file_get_contents($pathToFile);
 
     switch (pathinfo($pathToFile, PATHINFO_EXTENSION)) {
         case 'json':
