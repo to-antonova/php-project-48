@@ -4,31 +4,12 @@ namespace Differ\Differ;
 
 use function Differ\Parsers\turnIntoArray;
 use function Differ\Formatters\format;
-
-function cmp(array $a, array $b)
-{
-    if ($a['key'] == $b['key']) {
-        return 0;
-    }
-    return ($a['key'] < $b['key']) ? -1 : 1;
-}
-
-function mySort(array $a)
-{
-    $newA = $a;
-    usort($newA, 'Differ\Differ\cmp');
-    return array_map(function ($v) {
-        $newV = $v;
-        if (array_key_exists('children', $newV)) {
-            $newV['children'] = mySort($v['children']);
-        }
-        return $newV;
-    }, $newA);
-}
+use function Functional\sort;
 
 function findArrayDiff(array $arrayFirstFile, array $arraySecondFile): array
 {
     $mergedKeys = array_keys(array_merge($arrayFirstFile, $arraySecondFile));
+    $sortedKeys = sort($mergedKeys, fn ($left, $right) => strcmp($left, $right));
     return array_map(function ($key) use ($arrayFirstFile, $arraySecondFile) {
         if (!array_key_exists($key, $arrayFirstFile)) {
             return ['key' => $key, 'status' => 'added', 'value' => $arraySecondFile[$key]];
@@ -49,7 +30,7 @@ function findArrayDiff(array $arrayFirstFile, array $arraySecondFile): array
                 'newValue' => $arraySecondFile[$key]
             ];
         }
-    }, $mergedKeys);
+    }, $sortedKeys);
 }
 
 function genDiff(string $pathToFirstFile, string $pathToSecondFile, string $formatType = 'stylish')
@@ -57,6 +38,5 @@ function genDiff(string $pathToFirstFile, string $pathToSecondFile, string $form
     $arrayFirstFile = turnIntoArray($pathToFirstFile);
     $arraySecondFile = turnIntoArray($pathToSecondFile);
     $arrayDiff = findArrayDiff($arrayFirstFile, $arraySecondFile);
-    $sortedArrayDiff = mySort($arrayDiff);
-    return format($sortedArrayDiff, $formatType);
+    return format($arrayDiff, $formatType);
 }
