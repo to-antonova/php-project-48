@@ -2,82 +2,52 @@
 
 namespace Differ\Formatters\Plain;
 
-function stayBool(mixed $value): string
-{
-    if ($value === null) {
-        return "null";
-    }
+use function Functional\flatten;
 
+function stayBool($value)
+{
     if ($value === true) {
         return "true";
-    }
-
-    if ($value === false) {
+    } elseif ($value === false) {
         return "false";
-    } else {
-        return $value;
-    }
-}
-
-function isComplexValue(mixed $value): string
-{
-    if (is_array($value)) {
+    } elseif ($value === null) {
+        return "null";
+    } elseif (is_array($value)) {
         return "[complex value]";
     } elseif (is_string($value)) {
-        if ($value === "null") {
-            return "null";
-        } elseif ($value === "true") {
-            return "true";
-        } elseif ($value === "false") {
-            return "false";
-        } else {
-            return "'$value'";
-        }
-    } else {
-        return stayBool($value);
+        return "'{$value}'";
     }
+    return $value;
 }
 
-function toPlain(array $array, array &$resultArray = [], array &$propertyPath = []): string
+function prepareDiff(array $diff, string $path): array
 {
-    foreach ($array as $arrayKey => $arrayValue) {
-        $propertyPath[] = $arrayKey;
-
-        if (!array_key_exists("status", $arrayValue)) {
-            toPlain($arrayValue, $resultArray, $propertyPath);
-            array_pop($propertyPath);
-            continue;
+    return array_map(function ($node) use ($path) {
+        switch ($node['status']) {
+            case 'updated':
+                $oldValue = stayBool($node['oldValue']);
+                $newValue = stayBool($node['newValue']);
+                return "Property '{$path}{$node['key']}' was updated. From {$oldValue} to {$newValue}";
+            case 'added':
+                $value = stayBool($node['value']);
+                return "Property '{$path}{$node['key']}' was added with value: {$value}";
+            case 'removed':
+                return "Property '{$path}{$node['key']}' was removed";
+            case 'unchanged':
+                return [];
+            case 'changed':
+                $newPath = "{$path}{$node['key']}.";
+                $children = $node['children'];
+                return prepareDiff($children, $newPath);
+            default:
+                throw new \Exception("Unknown node status '{$node['status']}'");
         }
+    }, $diff);
+}
 
-        // если свойство есть в обоих массивах с одинаковыми значениями
-        if ($arrayValue["status"] === "unchanged") {
-            array_pop($propertyPath);
-            continue;
-
-        // если свойство есть в обоих массивах, но с разными значениями
-        } elseif ($arrayValue["status"] === "updated") {
-            $value1 = isComplexValue($arrayValue["value1"]);
-            $value2 = isComplexValue($arrayValue["value2"]);
-            $path = implode(".", $propertyPath);
-            $string = "Property '{$path}' was updated. From {$value1} to {$value2}";
-            // чтобы не было дублирования строк
-            if (!in_array($string, $resultArray, true)) {
-                $resultArray[] = $string;
-            }
-
-        // если значение есть только в первом массиве
-        } elseif ($arrayValue["status"] === "removed") {
-            $path = implode(".", $propertyPath);
-            $resultArray[] = "Property '{$path}' was removed";
-
-        // если значение есть только во втором массиве
-        } elseif ($arrayValue["status"] === "added") {
-            $path = implode(".", $propertyPath);
-            $value = isComplexValue($arrayValue["value"]);
-            $resultArray[] = "Property '{$path}' was added with value: {$value}";
-        }
-        array_pop($propertyPath);
-    }
-
-    return implode(PHP_EOL, $resultArray);
+function toPlain(array $diff): string
+{
+    $preparedStrings = prepareDiff($diff, '');
+    $joinedStrings = implode(PHP_EOL, flatten($preparedStrings));
+    return "{$joinedStrings}";
 }

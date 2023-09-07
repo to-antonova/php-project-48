@@ -1,69 +1,98 @@
-{
-    "common": {
-        "follow": {
-            "status": "added",
-            "value": false
-        },
-        "setting1": {
-            "status": "unchanged",
-            "value": "Value 1"
-        },
-        "setting2": {
-            "status": "removed",
-            "value": 200
-        },
-        "setting3": {
-            "status": "updated",
-            "value1": true,
-            "value2": null
-        },
-        "setting4": {
-            "status": "added",
-            "value": "blah blah"
-        },
-        "setting5": {
-            "status": "added",
-            "value": {
-                "key5": "value5"
-            }
-        },
-        "setting6": {
-            "doge": {
-                "wow": {
-                    "status": "updated",
-                    "value1": "",
-                    "value2": "so much"
+[
+    {
+        "key": "common",
+        "status": "changed",
+        "children": [
+            {
+                "key": "follow",
+                "status": "added",
+                "value": false
+            },
+            {
+                "key": "setting1",
+                "status": "unchanged",
+                "value": "Value 1"
+            },
+            {
+                "key": "setting2",
+                "status": "removed",
+                "value": 200
+            },
+            {
+                "key": "setting3",
+                "status": "updated",
+                "oldValue": true,
+                "newValue": null
+            },
+            {
+                "key": "setting4",
+                "status": "added",
+                "value": "blah blah"
+            },
+            {
+                "key": "setting5",
+                "status": "added",
+                "value": {
+                    "key5": "value5"
                 }
             },
-            "key": {
-                "status": "unchanged",
-                "value": "value"
-            },
-            "ops": {
-                "status": "added",
-                "value": "vops"
+            {
+                "key": "setting6",
+                "status": "changed",
+                "children": [
+                    {
+                        "key": "doge",
+                        "status": "changed",
+                        "children": [
+                            {
+                                "key": "wow",
+                                "status": "updated",
+                                "oldValue": "",
+                                "newValue": "so much"
+                            }
+                        ]
+                    },
+                    {
+                        "key": "key",
+                        "status": "unchanged",
+                        "value": "value"
+                    },
+                    {
+                        "key": "ops",
+                        "status": "added",
+                        "value": "vops"
+                    }
+                ]
             }
-        }
+        ]
     },
-    "group1": {
-        "baz": {
-            "status": "updated",
-            "value1": "bas",
-            "value2": "bars"
-        },
-        "foo": {
-            "status": "unchanged",
-            "value": "bar"
-        },
-        "nest": {
-            "status": "updated",
-            "value1": {
-                "key": "value"
+    {
+        "key": "group1",
+        "status": "changed",
+        "children": [
+            {
+                "key": "baz",
+                "status": "updated",
+                "oldValue": "bas",
+                "newValue": "bars"
             },
-            "value2": "str"
-        }
+            {
+                "key": "foo",
+                "status": "unchanged",
+                "value": "bar"
+            },
+            {
+                "key": "nest",
+                "status": "updated",
+                "oldValue": {
+                    "key": "value"
+                },
+                "newValue": "str"
+            }
+        ]
     },
-    "group2": {
+    {
+        "key": "group2",
         "status": "removed",
         "value": {
             "abc": 12345,
@@ -72,7 +101,8 @@
             }
         }
     },
-    "group3": {
+    {
+        "key": "group3",
         "status": "added",
         "value": {
             "deep": {
@@ -83,4 +113,4 @@
             "fee": 100500
         }
     }
-}
+]

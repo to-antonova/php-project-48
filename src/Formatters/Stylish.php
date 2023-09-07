@@ -2,123 +2,83 @@
 
 namespace Differ\Formatters\Stylish;
 
-function stayBool(mixed $value): string
+use function Functional\flatten;
+
+function formatArray(array $node): array
 {
-    if ($value === null) {
-        return "null";
-    }
+    $keys = array_keys($node);
+    return array_map(function ($key) use ($node) {
+        return ['key' => $key, 'value' => $node[$key]];
+    }, $keys);
+}
 
+function stringify($value, int $depth): string
+{
     if ($value === true) {
-        return "true";
+        return 'true';
+    } elseif ($value === false) {
+        return 'false';
+    } elseif ($value === null) {
+        return 'null';
     }
-
-    if ($value === false) {
-        return "false";
-    } else {
+    if (!is_array($value)) {
         return $value;
     }
+    $newArray =  array_map(function ($node) use ($depth) {
+        $signNoDiff = '    ';
+        $indent = str_repeat('    ', $depth);
+        $childrenValue = stringify($node['value'], $depth + 1);
+        return "{$indent}{$signNoDiff}{$node['key']}: {$childrenValue}";
+    }, formatArray($value));
+    $arrayToStr = implode(PHP_EOL, $newArray);
+    $lastIndent = str_repeat('    ', $depth - 1);
+
+    return "{" . PHP_EOL . $arrayToStr . PHP_EOL . $lastIndent . "    }";
 }
 
-function keepArray(array $array, int $depth, array &$resultArray = [], array &$bracketStack = []): array
+function prepareDiff(array $diff, int $depth): array
 {
-    $indent = str_repeat('    ', $depth);
-    foreach ($array as $key => $value) {
-        if (is_array($value)) {
-            $resultArray[] = sprintf('%s%s: {', $indent, $key);
-            array_push($bracketStack, '{');
-            keepArray($value, $depth + 1, $resultArray, $bracketStack);
-        } else {
-            if ($value === "value5") {
-                $resultArray[] = sprintf('            %s: %s', $key, stayBool($value));
-            } else {
-                $resultArray[] = sprintf('%s%s: %s', $indent, $key, stayBool($value));
-            }
-            continue;
+    return array_map(function ($node) use ($depth) {
+        $signFirstDiff = '  - ';
+        $signSecondDiff = '  + ';
+        $signNoDiff = '    ';
+        $indent = str_repeat('    ', $depth - 1);
+        switch ($node['status']) {
+            case 'unchanged':
+                $sign = $signNoDiff;
+                $value = stringify($node['value'], $depth);
+                return "{$indent}{$sign}{$node['key']}: {$value}";
+            case 'added':
+                $sign = $signSecondDiff;
+                $value = stringify($node['value'], $depth);
+                return "{$indent}{$sign}{$node['key']}: {$value}";
+            case 'removed':
+                $sign = $signFirstDiff;
+                $value = stringify($node['value'], $depth);
+                return "{$indent}{$sign}{$node['key']}: {$value}";
+            case 'updated':
+                $oldValue = stringify($node['oldValue'], $depth);
+                $newValue = stringify($node['newValue'], $depth);
+                $firstStr = "{$indent}{$signFirstDiff}{$node['key']}: {$oldValue}";
+                $secondStr = "{$indent}{$signSecondDiff}{$node['key']}: {$newValue}";
+                return $firstStr . PHP_EOL . $secondStr;
+            case 'changed':
+                $sign = $signNoDiff;
+                $children = $node['children'];
+                $firstStr = "{$indent}{$sign}{$node['key']}: {";
+                $preparedStrings = prepareDiff($children, $depth + 1);
+                $childrenStr = implode(PHP_EOL, $preparedStrings);
+                $lastStr = "{$indent}    }";
+                return $firstStr . PHP_EOL . $childrenStr . PHP_EOL . $lastStr;
+            default:
+                throw new \Exception("Unknown node status '{$node['status']}'");
         }
-        if (in_array('{', $bracketStack, true)) {
-            $resultArray[] = sprintf('%s}', $indent);
-            array_pop($bracketStack);
-        }
-    }
-    return $resultArray;
+    }, $diff);
 }
 
-function toStylish(array $array, array &$resultArray = [], array &$bracketStack = [], int $depth = 1): string
+function toStylish(array $diff): string
 {
-    $indent = str_repeat('  ', $depth);
-    $deIndent = str_repeat('  ', $depth - 1);
-
-    foreach ($array as $arrayKey => $arrayValue) {
-//        var_dump($arrayKey);      // common, group1, group2, group3
-
-        if (array_key_exists("status", $arrayValue)) {
-            // если свойство является массивом и находится только в одном из файлов
-            if (array_key_exists("value", $arrayValue) && is_array($arrayValue["value"])) {
-                if (in_array($arrayValue["status"], ["removed", "added"], true)) {
-                    $sign = '';
-                    switch ($arrayValue["status"]) {
-                        case "removed":
-                            $sign = '- ';
-                            break;
-                        case "added":
-                            $sign = '+ ';
-                            break;
-                    }
-                    $resultArray[] = sprintf('%s%s%s: {', $indent, $sign, $arrayKey);
-                    $keepingArray = [];
-                    keepArray($arrayValue["value"], $depth + 1, $keepingArray, $bracketStack);
-                    $resultArray = array_merge($resultArray, $keepingArray);
-                    $resultArray[] = sprintf('%s  }', $indent);
-                }
-
-                // если свойство не является массивом
-            } else {
-                if ($arrayValue["status"] === "removed") {
-                    $resultArray[] = sprintf('%s- %s: %s', $indent, $arrayKey, stayBool($arrayValue["value"]));
-                } elseif ($arrayValue["status"] === "unchanged") {
-                    $resultArray[] = sprintf('%s  %s: %s', $indent, $arrayKey, stayBool($arrayValue["value"]));
-                } elseif ($arrayValue["status"] === "added") {
-                    $resultArray[] = sprintf('%s+ %s: %s', $indent, $arrayKey, stayBool($arrayValue["value"]));
-                } elseif ($arrayValue["status"] === "updated") {
-                    if (!is_array($arrayValue["value1"])) {
-                        // костыль, чтобы wow с пустым значением выводился корректно
-                        // в файл expected2.txt не могу добавить пробел после wow, автоматически удаляется
-                        if ($arrayKey === "wow" && $arrayValue["value1"] === "") {
-                            $resultArray[] = sprintf('%s- %s:', $indent, $arrayKey);
-                        } else {
-                            $resultArray[] = sprintf('%s- %s: %s', $indent, $arrayKey, stayBool($arrayValue["value1"]));
-                        }
-                    } else {
-                        $resultArray[] = sprintf('%s- %s: {', $indent, $arrayKey);
-                        $keepingArray = [];
-                        keepArray($arrayValue["value1"], $depth, $keepingArray, $bracketStack);
-                        $resultArray = array_merge($resultArray, $keepingArray);
-                        $resultArray[] = sprintf('%s  }', $indent);
-                    }
-                    if (!is_array($arrayValue["value2"])) {
-                        $resultArray[] = sprintf('%s+ %s: %s', $indent, $arrayKey, stayBool($arrayValue["value2"]));
-                    } else {
-                        $resultArray[] = sprintf('%s+ %s: {', $indent, $arrayKey);
-                        $keepingArray = [];
-                        keepArray($arrayValue["value2"], $depth, $keepingArray, $bracketStack);
-                        $resultArray = array_merge($resultArray, $keepingArray);
-                        $resultArray[] = sprintf('%s  }', $indent);
-                    }
-                }
-            }
-
-            // если у свойства нет ключей status-value
-        } else {
-            $resultArray[] = sprintf('%s  %s: {', $indent, stayBool($arrayKey));
-            array_push($bracketStack, '{');
-            toStylish($arrayValue, $resultArray, $bracketStack, $depth + 2);
-        }
-    }
-
-    if (in_array('{', $bracketStack, true)) {
-        $resultArray[] = sprintf('%s}', $deIndent);
-        array_pop($bracketStack);
-    }
-
-    return '{' . PHP_EOL . implode(PHP_EOL, $resultArray) . PHP_EOL . '}';
+    $preparedStrings = prepareDiff($diff, 1);
+    $joinedStrings = implode("\n", flatten($preparedStrings));
+    return "{\n{$joinedStrings}\n}";
 }
