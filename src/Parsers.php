@@ -5,15 +5,13 @@ namespace Differ\Parsers;
 use Symfony\Component\Yaml\Yaml;
 use Exception;
 
-function turnIntoArray(string $pathToFile)
+/**
+ * @throws Exception
+ */
+function convertToArray(string $pathToFile, string $fileContent)
 {
-    if ($pathToFile == "") {
-        return '\033[41mPath Error!\033[0m' . PHP_EOL;
-    }
-
-    $fileContent = (string) file_get_contents($pathToFile);
-
-    switch (pathinfo($pathToFile, PATHINFO_EXTENSION)) {
+    $extension = pathinfo($pathToFile, PATHINFO_EXTENSION);
+    switch ($extension) {
         case 'json':
             return json_decode($fileContent, true);
         case 'yaml':

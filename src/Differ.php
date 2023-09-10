@@ -2,7 +2,9 @@
 
 namespace Differ\Differ;
 
-use function Differ\Parsers\turnIntoArray;
+use Exception;
+
+use function Differ\Parsers\convertToArray;
 use function Differ\Formatters\format;
 use function Functional\sort;
 
@@ -33,10 +35,27 @@ function findArrayDiff(array $arrayFirstFile, array $arraySecondFile): array
     }, $sortedKeys);
 }
 
+function getFileContent(string $pathToFile): array
+{
+    $fileContent = (string) file_get_contents($pathToFile);
+    return convertToArray($pathToFile, $fileContent);
+}
+
+/**
+ * @throws Exception
+ */
 function genDiff(string $pathToFirstFile, string $pathToSecondFile, string $formatType = 'stylish')
 {
-    $arrayFirstFile = turnIntoArray($pathToFirstFile);
-    $arraySecondFile = turnIntoArray($pathToSecondFile);
+    if ($pathToFirstFile == "") {
+        throw new Exception('First file path error');
+    }
+
+    if ($pathToSecondFile == "") {
+        throw new Exception('Second file path error');
+    }
+
+    $arrayFirstFile = getFileContent($pathToFirstFile);
+    $arraySecondFile = getFileContent($pathToSecondFile);
     $arrayDiff = findArrayDiff($arrayFirstFile, $arraySecondFile);
     return format($arrayDiff, $formatType);
 }

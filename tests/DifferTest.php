@@ -2,78 +2,78 @@
 
 namespace Differ\Tests;
 
+use Exception;
 use PHPUnit\Framework\TestCase;
 
 use function Differ\Differ\genDiff;
 
 class DifferTest extends TestCase
 {
-    public function testGenDiff()
+    /**
+     * @param string $firstFile
+     * @param string $secondFile
+     * @param string $format
+     * @param string $expected
+     * @throws Exception
+     * @dataProvider genDiffDataProvider
+     */
+    public function testGenDiff(string $expected, string $firstFile, string $secondFile, string $format = 'stylish')
     {
-        $expected1 = file_get_contents(__DIR__ . "/fixtures/expected1.txt");
-
-        // проверка плоских файлов json
-        $file1 = __DIR__ . "/fixtures/file1.json";
-        $file2 = __DIR__ . "/fixtures/file2.json";
-        $this->assertEquals($expected1, genDiff($file1, $file2));
-
-        // проверка плоских файлов yaml
-        $file3 = __DIR__ . "/fixtures/file3.yml";
-        $file4 = __DIR__ . "/fixtures/file4.yml";
-        $this->assertEquals($expected1, genDiff($file3, $file4));
-
-        echo "\n\033[42mFlat Tests passed!\033[0m\n";
+        $actual = genDiff($firstFile, $secondFile, $format);
+        $this->assertEquals($expected, $actual);
     }
 
-
-    public function testGenDiffRecursive()
+    public static function genDiffDataProvider(): array
     {
-        $expected2 = file_get_contents(__DIR__ . "/fixtures/expected2.txt");
-
-        // рекурсивное сравнение json
-        $file5 = __DIR__ . "/fixtures/file5.json";
-        $file6 = __DIR__ . "/fixtures/file6.json";
-        $this->assertEquals($expected2, genDiff($file5, $file6));
-
-        // рекурсивное сравнение yaml
-        $file7 = __DIR__ . "/fixtures/file7.yaml";
-        $file8 = __DIR__ . "/fixtures/file8.yaml";
-        $this->assertEquals($expected2, genDiff($file7, $file8));
-
-        echo "\n\033[42mRecursive Tests passed!\033[0m\n";
-    }
-
-    public function testGenDiffPlain()
-    {
-        $expected3 = file_get_contents(__DIR__ . "/fixtures/expected3.txt");
-
-        // плоский формат json
-        $file5 = __DIR__ . "/fixtures/file5.json";
-        $file6 = __DIR__ . "/fixtures/file6.json";
-        $this->assertEquals($expected3, genDiff($file5, $file6, 'plain'));
-
-        // плоский формат yaml
-        $file7 = __DIR__ . "/fixtures/file7.yaml";
-        $file8 = __DIR__ . "/fixtures/file8.yaml";
-        $this->assertEquals($expected3, genDiff($file7, $file8, 'plain'));
-
-        echo "\n\033[42mPlain Tests passed!\033[0m\n";
-    }
-
-    public function testGenDiffJsonFormat()
-    {
-        $expected4 = file_get_contents(__DIR__ . "/fixtures/expected4.json");
-
-        // формат json для файлов json
-        $file5 = __DIR__ . "/fixtures/file5.json";
-        $file6 = __DIR__ . "/fixtures/file6.json";
-        $this->assertEquals($expected4, genDiff($file5, $file6, 'json'));
-
-        // формат json для файлов yaml
-        $file7 = __DIR__ . "/fixtures/file7.yaml";
-        $file8 = __DIR__ . "/fixtures/file8.yaml";
-        $this->assertEquals($expected4, genDiff($file7, $file8, 'json'));
-
-        echo "\n\033[42mJsonFormat Tests passed!\033[0m\n";
+        $expectedFlat  = file_get_contents(__DIR__ . "/fixtures/expected1.txt");
+        $expectedRecursive  = file_get_contents(__DIR__ . "/fixtures/expected2.txt");
+        $expectedPlain = file_get_contents(__DIR__ . "/fixtures/expected3.txt");
+        $expectedOutputJson = file_get_contents(__DIR__ . "/fixtures/expected4.json");
+        return [
+            'diff json format files' => [
+                'expected' => $expectedFlat,
+                'firstFile' =>  __DIR__ . "/fixtures/file1.json",
+                'secondFile' =>  __DIR__ . "/fixtures/file2.json"
+            ],
+            'diff yml format files' => [
+                'expected' => $expectedFlat,
+                'firstFile' =>  __DIR__ . "/fixtures/file3.yml",
+                'secondFile' =>  __DIR__ . "/fixtures/file4.yml"
+            ],
+            'diff json format files recursive' => [
+                'expected' => $expectedRecursive,
+                'firstFile' =>  __DIR__ . "/fixtures/file5.json",
+                'secondFile' =>  __DIR__ . "/fixtures/file6.json"
+            ],
+            'diff yml format files recursive' => [
+                'expected' => $expectedRecursive,
+                'firstFile' =>  __DIR__ . "/fixtures/file7.yaml",
+                'secondFile' =>  __DIR__ . "/fixtures/file8.yaml"
+            ],
+            'diff json format files plain' => [
+                'expected' => $expectedPlain,
+                'firstFile' =>  __DIR__ . "/fixtures/file5.json",
+                'secondFile' =>  __DIR__ . "/fixtures/file6.json",
+                'format' => "plain"
+            ],
+            'diff yml format files plain' => [
+                'expected' => $expectedPlain,
+                'firstFile' =>  __DIR__ . "/fixtures/file7.yaml",
+                'secondFile' =>  __DIR__ . "/fixtures/file8.yaml",
+                'format' => "plain"
+            ],
+            'diff json format files output json' => [
+                'expected' => $expectedOutputJson,
+                'firstFile' =>  __DIR__ . "/fixtures/file5.json",
+                'secondFile' =>  __DIR__ . "/fixtures/file6.json",
+                'format' => "json"
+            ],
+            'diff yml format files output json' => [
+                'expected' => $expectedOutputJson,
+                'firstFile' =>  __DIR__ . "/fixtures/file7.yaml",
+                'secondFile' =>  __DIR__ . "/fixtures/file8.yaml",
+                'format' => "json"
+            ]
+        ];
     }
 }
