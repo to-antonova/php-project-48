@@ -15,7 +15,8 @@ function findArrayDiff(array $arrayFirstFile, array $arraySecondFile): array
     return array_map(function ($key) use ($arrayFirstFile, $arraySecondFile) {
         if (!array_key_exists($key, $arrayFirstFile)) {
             return ['key' => $key, 'status' => 'added', 'value' => $arraySecondFile[$key]];
-        } elseif (!array_key_exists($key, $arraySecondFile)) {
+        }
+        if (!array_key_exists($key, $arraySecondFile)) {
             return ['key' => $key, 'status' => 'removed', 'value' => $arrayFirstFile[$key]];
         }
         if (is_array($arrayFirstFile[$key]) && is_array($arraySecondFile[$key])) {
@@ -24,36 +25,35 @@ function findArrayDiff(array $arrayFirstFile, array $arraySecondFile): array
         }
         if ($arrayFirstFile[$key] === $arraySecondFile[$key]) {
             return  ['key' => $key, 'status' => 'unchanged', 'value' => $arrayFirstFile[$key]];
-        } else {
-            return [
-                'key' => $key,
-                'status' => 'updated',
-                'oldValue' => $arrayFirstFile[$key],
-                'newValue' => $arraySecondFile[$key]
-            ];
         }
+        return [
+            'key' => $key,
+            'status' => 'updated',
+            'oldValue' => $arrayFirstFile[$key],
+            'newValue' => $arraySecondFile[$key]
+        ];
     }, $sortedKeys);
 }
 
 function getFileContent(string $pathToFile): array
 {
-    $fileContent = (string) file_get_contents($pathToFile);
-    return convertToArray($pathToFile, $fileContent);
+    $realPathToFile = realpath($pathToFile);
+    if ($realPathToFile == "") {
+        throw new Exception('File not found, path to file: ' . $pathToFile);
+    }
+
+    $fileContent = file_get_contents($pathToFile);
+    if ($fileContent === false) {
+        throw new Exception('Cannot read the file');
+    }
+
+    $fileExtension = pathinfo($pathToFile, PATHINFO_EXTENSION);
+
+    return convertToArray($fileExtension, $fileContent);
 }
 
-/**
- * @throws Exception
- */
 function genDiff(string $pathToFirstFile, string $pathToSecondFile, string $formatType = 'stylish')
 {
-    if ($pathToFirstFile == "") {
-        throw new Exception('First file path error');
-    }
-
-    if ($pathToSecondFile == "") {
-        throw new Exception('Second file path error');
-    }
-
     $arrayFirstFile = getFileContent($pathToFirstFile);
     $arraySecondFile = getFileContent($pathToSecondFile);
     $arrayDiff = findArrayDiff($arrayFirstFile, $arraySecondFile);

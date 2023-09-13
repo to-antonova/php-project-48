@@ -8,10 +8,9 @@ use Exception;
 /**
  * @throws Exception
  */
-function convertToArray(string $pathToFile, string $fileContent)
+function convertToArray(string $fileExtension, string $fileContent)
 {
-    $extension = pathinfo($pathToFile, PATHINFO_EXTENSION);
-    switch ($extension) {
+    switch ($fileExtension) {
         case 'json':
             return json_decode($fileContent, true);
         case 'yaml':

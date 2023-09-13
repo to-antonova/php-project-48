@@ -10,68 +10,71 @@ use function Differ\Differ\genDiff;
 class DifferTest extends TestCase
 {
     /**
-     * @param string $firstFile
-     * @param string $secondFile
+     * @param string $firstFilePath
+     * @param string $secondFilePath
      * @param string $format
-     * @param string $expected
+     * @param string $expectedFilePath
      * @throws Exception
      * @dataProvider genDiffDataProvider
      */
-    public function testGenDiff(string $expected, string $firstFile, string $secondFile, string $format = 'stylish')
+    public function testGenDiff(string $expectedFilePath, string $firstFilePath, string $secondFilePath, string $format)
     {
+        $firstFile = __DIR__ . $firstFilePath;
+        $secondFile = __DIR__ . $secondFilePath;
+        $expected = __DIR__ . $expectedFilePath;
         $actual = genDiff($firstFile, $secondFile, $format);
-        $this->assertEquals($expected, $actual);
+        $this->assertStringEqualsFile($expected, $actual);
     }
 
     public static function genDiffDataProvider(): array
     {
-        $expectedFlat  = file_get_contents(__DIR__ . "/fixtures/expected1.txt");
-        $expectedRecursive  = file_get_contents(__DIR__ . "/fixtures/expected2.txt");
-        $expectedPlain = file_get_contents(__DIR__ . "/fixtures/expected3.txt");
-        $expectedOutputJson = file_get_contents(__DIR__ . "/fixtures/expected4.json");
         return [
             'diff json format files' => [
-                'expected' => $expectedFlat,
-                'firstFile' =>  __DIR__ . "/fixtures/file1.json",
-                'secondFile' =>  __DIR__ . "/fixtures/file2.json"
+                'expectedFilePath' => "/fixtures/expected1.txt",
+                'firstFilePath' => "/fixtures/file1.json",
+                'secondFilePath' => "/fixtures/file2.json",
+                'format' => "stylish"
             ],
             'diff yml format files' => [
-                'expected' => $expectedFlat,
-                'firstFile' =>  __DIR__ . "/fixtures/file3.yml",
-                'secondFile' =>  __DIR__ . "/fixtures/file4.yml"
+                'expectedFilePath' => "/fixtures/expected1.txt",
+                'firstFilePath' => "/fixtures/file3.yml",
+                'secondFilePath' => "/fixtures/file4.yml",
+                'format' => "stylish"
             ],
             'diff json format files recursive' => [
-                'expected' => $expectedRecursive,
-                'firstFile' =>  __DIR__ . "/fixtures/file5.json",
-                'secondFile' =>  __DIR__ . "/fixtures/file6.json"
+                'expectedFilePath' => "/fixtures/expected2.txt",
+                'firstFilePath' => "/fixtures/file5.json",
+                'secondFilePath' => "/fixtures/file6.json",
+                'format' => "stylish"
             ],
             'diff yml format files recursive' => [
-                'expected' => $expectedRecursive,
-                'firstFile' =>  __DIR__ . "/fixtures/file7.yaml",
-                'secondFile' =>  __DIR__ . "/fixtures/file8.yaml"
+                'expectedFilePath' => "/fixtures/expected2.txt",
+                'firstFilePath' => "/fixtures/file7.yaml",
+                'secondFilePath' => "/fixtures/file8.yaml",
+                'format' => "stylish"
             ],
             'diff json format files plain' => [
-                'expected' => $expectedPlain,
-                'firstFile' =>  __DIR__ . "/fixtures/file5.json",
-                'secondFile' =>  __DIR__ . "/fixtures/file6.json",
+                'expectedFilePath' => "/fixtures/expected3.txt",
+                'firstFilePath' => "/fixtures/file5.json",
+                'secondFilePath' => "/fixtures/file6.json",
                 'format' => "plain"
             ],
             'diff yml format files plain' => [
-                'expected' => $expectedPlain,
-                'firstFile' =>  __DIR__ . "/fixtures/file7.yaml",
-                'secondFile' =>  __DIR__ . "/fixtures/file8.yaml",
+                'expectedFilePath' => "/fixtures/expected3.txt",
+                'firstFilePath' => "/fixtures/file7.yaml",
+                'secondFilePath' => "/fixtures/file8.yaml",
                 'format' => "plain"
             ],
             'diff json format files output json' => [
-                'expected' => $expectedOutputJson,
-                'firstFile' =>  __DIR__ . "/fixtures/file5.json",
-                'secondFile' =>  __DIR__ . "/fixtures/file6.json",
+                'expectedFilePath' => "/fixtures/expected4.json",
+                'firstFilePath' => "/fixtures/file5.json",
+                'secondFilePath' => "/fixtures/file6.json",
                 'format' => "json"
             ],
             'diff yml format files output json' => [
-                'expected' => $expectedOutputJson,
-                'firstFile' =>  __DIR__ . "/fixtures/file7.yaml",
-                'secondFile' =>  __DIR__ . "/fixtures/file8.yaml",
+                'expectedFilePath' => "/fixtures/expected4.json",
+                'firstFilePath' => "/fixtures/file7.yaml",
+                'secondFilePath' => "/fixtures/file8.yaml",
                 'format' => "json"
             ]
         ];

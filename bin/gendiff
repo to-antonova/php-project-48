@@ -28,11 +28,9 @@ DOC;
 $args = Docopt::handle($doc, ['version' => 'GenDiff 1.0']);
 
 $format = $args['--format'] ?? 'stylish';
-$firstFilePath = realpath($args['<firstFile>']);
-$secondFilePath = realpath($args['<secondFile>']);
 
 try {
-    echo genDiff($firstFilePath, $secondFilePath, $format);
+    echo genDiff($args['<firstFile>'], $args['<secondFile>'], $format);
 }catch (Throwable $error) {
     echo sprintf("\033[41m%s\033[0m", $error->getMessage());
 }
