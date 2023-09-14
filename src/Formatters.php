@@ -8,7 +8,6 @@ use Differ\Formatters;
 function format(array $array, string $formatType): string
 {
     switch ($formatType) {
-
         case 'stylish':
             return Formatters\Stylish\toStylish($array);
 
@@ -20,6 +19,5 @@ function format(array $array, string $formatType): string
 
         default:
             throw new Exception('Non-existent format: ' . $formatType . PHP_EOL);
-
     }
 }

@@ -8,9 +8,7 @@ function formatArray(array $node): array
 {
     $keys = array_keys($node);
     return array_map(function ($key) use ($node) {
-
         return ['key' => $key, 'value' => $node[$key]];
-
     }, $keys);
 }
 
@@ -33,12 +31,10 @@ function stringify(mixed $value, int $depth): string
     }
 
     $children =  array_map(function ($child) use ($depth) {
-
         $signNoSign = '    ';
         $indent = str_repeat('    ', $depth);
         $childValue = stringify($child['value'], $depth + 1);
         return "{$indent}{$signNoSign}{$child['key']}: {$childValue}";
-
     }, formatArray($value));
 
     $childrenToStr = implode(PHP_EOL, $children);
@@ -57,7 +53,6 @@ function prepareDiff(array $diff, int $depth): array
         $indent = str_repeat('    ', $depth - 1);
 
         switch ($node['status']) {
-
             case 'unchanged':
                 $sign = $signNoSign;
                 $value = stringify($node['value'], $depth);
@@ -91,7 +86,6 @@ function prepareDiff(array $diff, int $depth): array
 
             default:
                 throw new \Exception("Unknown node status '{$node['status']}'");
-
         }
     }, $diff);
 }

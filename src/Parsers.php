@@ -11,7 +11,6 @@ use Exception;
 function convertToArray(string $fileExtension, string $fileContent)
 {
     switch ($fileExtension) {
-
         case 'json':
             return json_decode($fileContent, true);
 
@@ -21,6 +20,5 @@ function convertToArray(string $fileExtension, string $fileContent)
 
         default:
             throw new Exception('Extension error! Try json, yaml, yml.' . PHP_EOL);
-
     }
 }

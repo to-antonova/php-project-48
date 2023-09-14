@@ -14,7 +14,6 @@ function findArrayDiff(array $arrayFirstFile, array $arraySecondFile): array
     $sortedKeys = sort($mergedKeys, fn ($left, $right) => strcmp($left, $right));
 
     return array_map(function ($key) use ($arrayFirstFile, $arraySecondFile) {
-
         if (!array_key_exists($key, $arrayFirstFile)) {
             return ['key' => $key, 'status' => 'added', 'value' => $arraySecondFile[$key]];
         }
@@ -38,7 +37,6 @@ function findArrayDiff(array $arrayFirstFile, array $arraySecondFile): array
             'oldValue' => $arrayFirstFile[$key],
             'newValue' => $arraySecondFile[$key]
         ];
-
     }, $sortedKeys);
 }
 

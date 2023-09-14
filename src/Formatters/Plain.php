@@ -33,7 +33,6 @@ function prepareDiff(array $diff, string $path): array
     return array_map(function ($node) use ($path) {
 
         switch ($node['status']) {
-
             case 'updated':
                 $oldValue = stayBool($node['oldValue']);
                 $newValue = stayBool($node['newValue']);
@@ -56,7 +55,6 @@ function prepareDiff(array $diff, string $path): array
 
             default:
                 throw new \Exception("Unknown node status '{$node['status']}'");
-
         }
     }, $diff);
 }
