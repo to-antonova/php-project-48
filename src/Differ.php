@@ -12,26 +12,33 @@ function findArrayDiff(array $arrayFirstFile, array $arraySecondFile): array
 {
     $mergedKeys = array_keys(array_merge($arrayFirstFile, $arraySecondFile));
     $sortedKeys = sort($mergedKeys, fn ($left, $right) => strcmp($left, $right));
+
     return array_map(function ($key) use ($arrayFirstFile, $arraySecondFile) {
+
         if (!array_key_exists($key, $arrayFirstFile)) {
             return ['key' => $key, 'status' => 'added', 'value' => $arraySecondFile[$key]];
         }
+
         if (!array_key_exists($key, $arraySecondFile)) {
             return ['key' => $key, 'status' => 'removed', 'value' => $arrayFirstFile[$key]];
         }
+
         if (is_array($arrayFirstFile[$key]) && is_array($arraySecondFile[$key])) {
             $children = findArrayDiff($arrayFirstFile[$key], $arraySecondFile[$key]);
             return ['key' => $key, 'status' => 'changed', 'children' => $children];
         }
+
         if ($arrayFirstFile[$key] === $arraySecondFile[$key]) {
             return  ['key' => $key, 'status' => 'unchanged', 'value' => $arrayFirstFile[$key]];
         }
+
         return [
             'key' => $key,
             'status' => 'updated',
             'oldValue' => $arrayFirstFile[$key],
             'newValue' => $arraySecondFile[$key]
         ];
+
     }, $sortedKeys);
 }
 
@@ -54,8 +61,9 @@ function getFileContent(string $pathToFile): array
 
 function genDiff(string $pathToFirstFile, string $pathToSecondFile, string $formatType = 'stylish')
 {
-    $arrayFirstFile = getFileContent($pathToFirstFile);
-    $arraySecondFile = getFileContent($pathToSecondFile);
-    $arrayDiff = findArrayDiff($arrayFirstFile, $arraySecondFile);
-    return format($arrayDiff, $formatType);
+    $firstFile = getFileContent($pathToFirstFile);
+    $secondFile = getFileContent($pathToSecondFile);
+    $diff = findArrayDiff($firstFile, $secondFile);
+
+    return format($diff, $formatType);
 }
