@@ -5,7 +5,7 @@ namespace Differ\Differ;
 use Exception;
 
 use function Differ\Parsers\convertToArray;
-use function Differ\Formatters\format;
+use function Differ\Formatters\formatOutput;
 use function Functional\sort;
 
 function findArrayDiff(array $arrayFirstFile, array $arraySecondFile): array
@@ -63,5 +63,5 @@ function genDiff(string $pathToFirstFile, string $pathToSecondFile, string $form
     $secondFile = getFileContent($pathToSecondFile);
     $diff = findArrayDiff($firstFile, $secondFile);
 
-    return format($diff, $formatType);
+    return formatOutput($diff, $formatType);
 }

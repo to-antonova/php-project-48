@@ -90,7 +90,7 @@ function prepareDiff(array $diff, int $depth): array
     }, $diff);
 }
 
-function toStylish(array $diff): string
+function format(array $diff): string
 {
     $preparedStrings = prepareDiff($diff, 1);
     $joinedStrings = implode("\n", flatten($preparedStrings));

@@ -3,19 +3,18 @@
 namespace Differ\Formatters;
 
 use Exception;
-use Differ\Formatters;
 
-function format(array $array, string $formatType): string
+function formatOutput(array $diff, string $formatType): string
 {
     switch ($formatType) {
         case 'stylish':
-            return Formatters\Stylish\toStylish($array);
+            return Stylish\format($diff);
 
         case 'plain':
-            return Formatters\Plain\toPlain($array);
+            return Plain\format($diff);
 
         case 'json':
-            return Formatters\Json\toJson($array);
+            return Json\format($diff);
 
         default:
             throw new Exception('Non-existent format: ' . $formatType . PHP_EOL);

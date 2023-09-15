@@ -59,7 +59,7 @@ function prepareDiff(array $diff, string $path): array
     }, $diff);
 }
 
-function toPlain(array $diff): string
+function format(array $diff): string
 {
     $preparedStrings = prepareDiff($diff, '');
     $joinedStrings = implode(PHP_EOL, flatten($preparedStrings));
