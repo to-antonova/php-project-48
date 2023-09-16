@@ -8,34 +8,34 @@ use function Differ\Parsers\convertToArray;
 use function Differ\Formatters\formatOutput;
 use function Functional\sort;
 
-function findArrayDiff(array $arrayFirstFile, array $arraySecondFile): array
+function findDiff(array $firstDataStructure, array $secondDataStructure): array
 {
-    $mergedKeys = array_keys(array_merge($arrayFirstFile, $arraySecondFile));
+    $mergedKeys = array_keys(array_merge($firstDataStructure, $secondDataStructure));
     $sortedKeys = sort($mergedKeys, fn ($left, $right) => strcmp($left, $right));
 
-    return array_map(function ($key) use ($arrayFirstFile, $arraySecondFile) {
-        if (!array_key_exists($key, $arrayFirstFile)) {
-            return ['key' => $key, 'status' => 'added', 'value' => $arraySecondFile[$key]];
+    return array_map(function ($key) use ($firstDataStructure, $secondDataStructure) {
+        if (!array_key_exists($key, $firstDataStructure)) {
+            return ['key' => $key, 'status' => 'added', 'value' => $secondDataStructure[$key]];
         }
 
-        if (!array_key_exists($key, $arraySecondFile)) {
-            return ['key' => $key, 'status' => 'removed', 'value' => $arrayFirstFile[$key]];
+        if (!array_key_exists($key, $secondDataStructure)) {
+            return ['key' => $key, 'status' => 'removed', 'value' => $firstDataStructure[$key]];
         }
 
-        if (is_array($arrayFirstFile[$key]) && is_array($arraySecondFile[$key])) {
-            $children = findArrayDiff($arrayFirstFile[$key], $arraySecondFile[$key]);
-            return ['key' => $key, 'status' => 'changed', 'children' => $children];
+        if (is_array($firstDataStructure[$key]) && is_array($secondDataStructure[$key])) {
+            $children = findDiff($firstDataStructure[$key], $secondDataStructure[$key]);
+            return ['key' => $key, 'status' => 'has children', 'children' => $children];
         }
 
-        if ($arrayFirstFile[$key] === $arraySecondFile[$key]) {
-            return  ['key' => $key, 'status' => 'unchanged', 'value' => $arrayFirstFile[$key]];
+        if ($firstDataStructure[$key] === $secondDataStructure[$key]) {
+            return  ['key' => $key, 'status' => 'unchanged', 'value' => $firstDataStructure[$key]];
         }
 
         return [
             'key' => $key,
             'status' => 'updated',
-            'oldValue' => $arrayFirstFile[$key],
-            'newValue' => $arraySecondFile[$key]
+            'oldValue' => $firstDataStructure[$key],
+            'newValue' => $secondDataStructure[$key]
         ];
     }, $sortedKeys);
 }
@@ -59,9 +59,9 @@ function getFileContent(string $pathToFile): array
 
 function genDiff(string $pathToFirstFile, string $pathToSecondFile, string $formatType = 'stylish')
 {
-    $firstFile = getFileContent($pathToFirstFile);
-    $secondFile = getFileContent($pathToSecondFile);
-    $diff = findArrayDiff($firstFile, $secondFile);
+    $firstDataStructure = getFileContent($pathToFirstFile);
+    $secondDataStructure = getFileContent($pathToSecondFile);
+    $diff = findDiff($firstDataStructure, $secondDataStructure);
 
     return formatOutput($diff, $formatType);
 }

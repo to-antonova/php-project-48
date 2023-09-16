@@ -4,7 +4,7 @@ namespace Differ\Formatters\Plain;
 
 use function Functional\flatten;
 
-function stayBool(mixed $value)
+function stringify(mixed $value)
 {
     if ($value === true) {
         return "true";
@@ -34,12 +34,12 @@ function prepareDiff(array $diff, string $path): array
 
         switch ($node['status']) {
             case 'updated':
-                $oldValue = stayBool($node['oldValue']);
-                $newValue = stayBool($node['newValue']);
+                $oldValue = stringify($node['oldValue']);
+                $newValue = stringify($node['newValue']);
                 return "Property '{$path}{$node['key']}' was updated. From {$oldValue} to {$newValue}";
 
             case 'added':
-                $value = stayBool($node['value']);
+                $value = stringify($node['value']);
                 return "Property '{$path}{$node['key']}' was added with value: {$value}";
 
             case 'removed':
@@ -48,7 +48,7 @@ function prepareDiff(array $diff, string $path): array
             case 'unchanged':
                 return [];
 
-            case 'changed':
+            case 'has children':
                 $newPath = "{$path}{$node['key']}.";
                 $children = $node['children'];
                 return prepareDiff($children, $newPath);

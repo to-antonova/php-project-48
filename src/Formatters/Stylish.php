@@ -75,7 +75,7 @@ function prepareDiff(array $diff, int $depth): array
                 $secondStr = "{$indent}{$signAdded}{$node['key']}: {$newValue}";
                 return $firstStr . PHP_EOL . $secondStr;
 
-            case 'changed':
+            case 'has children':
                 $sign = $signNoSign;
                 $children = $node['children'];
                 $firstStr = "{$indent}{$sign}{$node['key']}: {";
